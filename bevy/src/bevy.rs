@@ -5,9 +5,10 @@ use crate::{
     camera::PlayerCameraPlugin,
     ground::plane_start,
     light::{animate_light_direction, light_start_system},
+    transportation::BevyTransportation,
 };
 
-pub fn init_bevy(buildings: Vec<BevyBuilding>) {
+pub fn init_bevy(buildings: Vec<BevyBuilding>, bevy_transportations: Vec<BevyTransportation>) {
     let mut app = App::new();
 
     #[cfg(not(target_arch = "wasm32"))]
