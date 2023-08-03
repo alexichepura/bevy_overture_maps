@@ -1,0 +1,2 @@
+[alias]
+bevy = "r -r -p=bevy_overture --"

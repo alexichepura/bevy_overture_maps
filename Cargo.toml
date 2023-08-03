@@ -1,0 +1,21 @@
+[package]
+name = "bevy_overture_workspace"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+codegen-units = 1
+
+[workspace]
+resolver = "2"
+members = ["bevy"]
+
+[workspace.dependencies]
+bevy = { version = "0.11", features = ["jpeg"] }
+arrow = { version = "44.0.0", features = [
+    "ipc",
+    "test_utils",
+    "prettyprint",
+    "json",
+] }
+parquet = "44.0.0"
