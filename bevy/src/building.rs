@@ -1,10 +1,8 @@
 use bevy::{prelude::*, render::mesh::*};
 use geo::algorithm::TriangulateEarcut;
-use geo::algorithm::Vector2DOps;
-use geo::geodesic_distance::GeodesicDistance;
 use geo_types::Polygon;
 use std::f32::consts::FRAC_PI_2;
-use std::ops::{Add, Neg, Sub};
+use std::ops::Sub;
 
 #[derive(Component, Debug)]
 pub struct BevyBuilding {
@@ -20,24 +18,24 @@ pub struct BevyBuilding {
 pub struct BevyBuildings {
     pub buildings: Vec<BevyBuilding>,
 }
-pub fn polygon_base(polygon: &Polygon) -> (f64, [f64; 2]) {
-    let exterior = polygon.exterior();
-    let c1 = exterior
-        .coords()
-        .nth(0)
-        .expect("To take exterior:0 coordinate");
-    let p1 = geo::Point(*c1);
-    let c2 = exterior
-        .coords()
-        .nth(1)
-        .expect("To take exterior:1 coordinate");
-    let p2 = geo::Point(*c2);
-    let geodesic_distance = p1.geodesic_distance(&p2);
-    let coord_distance = c1.add(c2.neg()).magnitude();
-    let k = geodesic_distance / coord_distance;
-    let first_point_position: [f64; 2] = [c1.x * k, c1.y * k];
-    (k, first_point_position)
-}
+// pub fn polygon_base(polygon: &Polygon) -> (f64, [f64; 2]) {
+//     let exterior = polygon.exterior();
+//     let c1 = exterior
+//         .coords()
+//         .nth(0)
+//         .expect("To take exterior:0 coordinate");
+//     let p1 = geo::Point(*c1);
+//     let c2 = exterior
+//         .coords()
+//         .nth(1)
+//         .expect("To take exterior:1 coordinate");
+//     let p2 = geo::Point(*c2);
+//     let geodesic_distance = p1.geodesic_distance(&p2);
+//     let coord_distance = c1.add(c2.neg()).magnitude();
+//     let k = geodesic_distance / coord_distance;
+//     let first_point_position: [f64; 2] = [c1.x * k, c1.y * k];
+//     (k, first_point_position)
+// }
 
 pub fn polygon_building(
     polygon: Polygon,

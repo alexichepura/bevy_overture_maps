@@ -7,7 +7,11 @@ pub fn parquet_import() {
     // let path = "theme=admins/type=locality/20230725_211237_00132_5p54t_0fa79fec-7a39-4f51-90a6-aa94b553befd";
     // let path = "theme=buildings/type=building/20230725_211555_00082_tpd52_00e93efa-24f4-4014-b65a-38c7d2854ab4";
     // let path = format!("../overture/{path}");
-    let path = format!("./buildings-japan.parquet");
+    // let path = format!("./buildings-japan.parquet");
+    // let path = format!("./buildings-japan.parquet");
+    let path = format!(
+        "../overture/type=segment/20230726_134827_00007_dg6b6_09951677-6217-4b2f-b579-287ffed08510"
+    );
     let file = File::open(path).expect("Unable to open file");
 
     let reader: Box<dyn FileReader> =
@@ -30,6 +34,7 @@ pub fn parquet_import() {
                     // let geometry_vec = Vec::from(raw);
                     // let w = geozero::wkb::Wkb(geometry_vec);
                     // dbg!(&bytes.to_string());
+                    dbg!(&bytes.to_string());
                     println!("{:?}", &raw.len());
                     let mut rdr = std::io::Cursor::new(raw);
                     let g = geo_types::Geometry::from_wkb(&mut rdr, geozero::wkb::WkbDialect::Wkb);
@@ -57,9 +62,9 @@ pub fn parquet_import() {
             }
             // dbg!(name, field);
         }
-        c += 1;
-        if c > 3 {
+        if c >= 1 {
             break;
         }
+        c += 1;
     }
 }
