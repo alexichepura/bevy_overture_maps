@@ -3,7 +3,6 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::transportation::line_string_base;
 use crate::transportation::line_string_road;
 use crate::transportation::BevyTransportation;
 
@@ -11,6 +10,8 @@ pub struct TransportationQueryParams {
     pub limit: usize,
     pub where_string: String,
     pub from_string: String,
+    pub k: f64,
+    pub translate: [f64; 2],
 }
 
 pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransportation> {
@@ -66,7 +67,6 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         .unwrap();
 
     println!("statement for transportation - query loaded");
-
     let mut bevy_transportations: Vec<BevyTransportation> = vec![];
     for item in query_iter {
         let item = item.unwrap();
@@ -83,20 +83,11 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         let raw = [prefix.as_slice(), &raw].concat();
         let mut rdr = std::io::Cursor::new(raw);
         let g = Geometry::from_wkb(&mut rdr, WkbDialect::Wkb);
-
-        let mut base_pos: [f64; 2] = [0.; 2];
-        let mut base_k: f64 = 0.;
-        let mut is_base_set = false;
         match g {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
-                    if !is_base_set {
-                        let (k, pos) = line_string_base(&line_string);
-                        base_pos = pos;
-                        base_k = k;
-                        is_base_set = true;
-                    }
-                    let bevy_transportation = line_string_road(line_string, base_k, base_pos);
+                    let bevy_transportation =
+                        line_string_road(line_string, params.k, params.translate);
                     bevy_transportations.push(bevy_transportation);
                     // dbg!(line_string);
                 }

@@ -1,9 +1,7 @@
 use bevy::{prelude::*, render::mesh::*};
-use geo::algorithm::TriangulateEarcut;
 use geo::algorithm::Vector2DOps;
 use geo::geodesic_distance::GeodesicDistance;
 use geo_types::LineString;
-use geo_types::Polygon;
 use std::f32::consts::FRAC_PI_2;
 use std::ops::{Add, Neg, Sub};
 
@@ -38,23 +36,23 @@ pub fn line_string_road(line_string: LineString, k: f64, base: [f64; 2]) -> Bevy
         .collect();
     BevyTransportation { translate, line, k }
 }
-pub fn line_string_base(line_string: &LineString) -> (f64, [f64; 2]) {
-    let c1 = line_string
-        .coords()
-        .nth(0)
-        .expect("To take line_string:0 coordinate");
-    let p1 = geo::Point(*c1);
-    let c2 = line_string
-        .coords()
-        .nth(1)
-        .expect("To take line_string:1 coordinate");
-    let p2 = geo::Point(*c2);
-    let geodesic_distance = p1.geodesic_distance(&p2);
-    let coord_distance = c1.add(c2.neg()).magnitude();
-    let k = geodesic_distance / coord_distance;
-    let first_point_position: [f64; 2] = [c1.x * k, c1.y * k];
-    (k, first_point_position)
-}
+// pub fn line_string_base(line_string: &LineString) -> (f64, [f64; 2]) {
+//     let c1 = line_string
+//         .coords()
+//         .nth(0)
+//         .expect("To take line_string:0 coordinate");
+//     let p1 = geo::Point(*c1);
+//     let c2 = line_string
+//         .coords()
+//         .nth(1)
+//         .expect("To take line_string:1 coordinate");
+//     let p2 = geo::Point(*c2);
+//     let geodesic_distance = p1.geodesic_distance(&p2);
+//     let coord_distance = c1.add(c2.neg()).magnitude();
+//     let k = geodesic_distance / coord_distance;
+//     let first_point_position: [f64; 2] = [c1.x * k, c1.y * k];
+//     (k, first_point_position)
+// }
 
 pub fn transportations_start(
     mut cmd: Commands,

@@ -3,7 +3,7 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::building::{polygon_base, polygon_building, BevyBuilding};
+use crate::building::{polygon_building, BevyBuilding};
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
@@ -13,6 +13,8 @@ pub struct BuildingsQueryParams {
     pub limit: usize,
     pub where_string: String,
     pub from_string: String,
+    pub k: f64,
+    pub translate: [f64; 2],
 }
 
 pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding> {
@@ -76,9 +78,6 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         })
         .unwrap();
 
-    let mut base_pos: [f64; 2] = [0.; 2];
-    let mut base_k: f64 = 0.;
-    let mut is_base_set = false;
     let mut bevy_buildings: Vec<BevyBuilding> = vec![];
     for query_item in query_iter {
         let query_item = query_item.unwrap();
@@ -94,14 +93,8 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         match g {
             Ok(g) => match g {
                 Geometry::Polygon(polygon) => {
-                    if !is_base_set {
-                        let (k, pos) = polygon_base(&polygon);
-                        base_pos = pos;
-                        base_k = k;
-                        is_base_set = true;
-                    }
                     let bevy_building =
-                        polygon_building(polygon, base_k, base_pos, query_item.height);
+                        polygon_building(polygon, params.k, params.translate, query_item.height);
                     bevy_buildings.push(bevy_building);
                 }
                 not_polygon => {
