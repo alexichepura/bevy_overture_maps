@@ -1,6 +1,6 @@
 use bevy::init_bevy;
 use duckdb_query::{duckdb_query_buildings, BuildingsQueryParams};
-use query_transportation::{duckdb_query_transportation, TransportationQueryParams};
+use query_transportation::{query_transportation, TransportationQueryParams};
 
 mod bevy;
 mod building;
@@ -12,12 +12,8 @@ mod parquet_import;
 mod query_transportation;
 mod transportation;
 
-// https://docs.overturemaps.org/
-// https://www.ogc.org/standard/sfa/
-// https://duckdb.org/docs/data/multiple_files/overview
-
 fn main() {
-    parquet_import::parquet_import();
+    // parquet_import::parquet_import();
     let lat = std::env::var("BEVY_OVERTURE_LAT").expect("BEVY_OVERTURE_LAT env");
     dbg!(&lat);
     let lat = lat.parse::<f64>().expect("lat to be f64");
@@ -34,8 +30,8 @@ fn main() {
     let polygon_str = format!("{lng_min} {lat_min}, {lng_min} {lat_max}, {lng_max} {lat_max}, {lng_max} {lat_min}, {lng_min} {lat_min}", );
     let query = format!("ST_Within(ST_GeomFromWkb(geometry), ST_Envelope(ST_GeomFromText('POLYGON(({polygon_str}))')))");
 
-    let bevy_transportation = duckdb_query_transportation(TransportationQueryParams {
-        limit: 2,
+    let bevy_transportation = query_transportation(TransportationQueryParams {
+        limit: 100,
         from_string: "read_parquet('../overture/type=segment/*')".to_string(),
         where_string: query.clone(),
     });
