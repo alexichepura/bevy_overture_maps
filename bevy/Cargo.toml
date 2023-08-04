@@ -6,10 +6,9 @@ edition = "2021"
 [dependencies]
 arrow = { workspace = true }
 bevy = { workspace = true }
-parquet = { workspace = true }
-# geo = { version = "0.26.0", features = [] }
-geo = { git = "https://github.com/georust/geo" } # Vector2DOps
-geozero = { version = "0.10.0", features = ["with-wkb"] }
-geo-types = { version = "0.7.11" }
+geo = { workspace = true }
+geozero = { workspace = true }
+geo-types = { workspace = true }
 duckdb = { git = "https://github.com/duckdb/duckdb-rs", features = [
 ] } # arrow 44
+parquet = { workspace = true }

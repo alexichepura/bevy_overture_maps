@@ -17,6 +17,7 @@ mod transportation;
 // https://duckdb.org/docs/data/multiple_files/overview
 
 fn main() {
+    parquet_import::parquet_import();
     let lat = std::env::var("BEVY_OVERTURE_LAT").expect("BEVY_OVERTURE_LAT env");
     dbg!(&lat);
     let lat = lat.parse::<f64>().expect("lat to be f64");

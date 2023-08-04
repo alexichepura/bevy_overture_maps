@@ -84,6 +84,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         let query_item = query_item.unwrap();
         // println!("{:?}", &query_item);
         let raw = query_item.geom;
+        println!("statement for buildings - item geom: {raw:?}");
         // MAGIC TO GET ARRAY THAT WORKS, COMPARED TO BINARY FROM PARQUET DIRECTLY
         let raw = &raw[21..]; // remove 0, 2, 96, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0, 0,
         let prefix: [u8; 10] = [1, 3, 0, 0, 0, 1, 0, 0, 0, 5];

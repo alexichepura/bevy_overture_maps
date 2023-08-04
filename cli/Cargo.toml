@@ -1,0 +1,12 @@
+[package]
+name = "bevy_overture_cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+tokio = { workspace = true }
+geo = { workspace = true }
+geozero = { workspace = true }
+geo-types = { workspace = true }
+clap = { version = "4.3", features = ["derive"] }
