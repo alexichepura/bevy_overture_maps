@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { workspace = true }
-tokio = { workspace = true }
+clap = { version = "4.3", features = ["derive"] }
 geo = { workspace = true }
 geozero = { workspace = true }
 geo-types = { workspace = true }
-clap = { version = "4.3", features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

@@ -95,10 +95,10 @@ pub fn duckdb_query_transportation(params: TransportationQueryParams) -> Vec<Bev
         // let prefix: [u8; 10] = [1, 3, 0, 0, 0, 1, 0, 0, 0, 5];
         // let prefix: [u8; 5] = [1, 2, 0, 0, 0];
         // let prefix: [u8; 9] = [1, 2, 0, 0, 0, 6, 0, 0, 0];
-        let prefix: [u8; 1] = [1];
-        let raw = [prefix.as_slice(), &raw].concat();
+        // let prefix: [u8; 1] = [1];
+        // let raw = [prefix.as_slice(), &raw].concat();
         let mut rdr = std::io::Cursor::new(raw);
-        let g = Geometry::from_wkb(&mut rdr, WkbDialect::Ewkb);
+        let g = Geometry::from_wkb(&mut rdr, WkbDialect::Wkb);
         match g {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
