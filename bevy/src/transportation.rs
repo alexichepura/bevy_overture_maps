@@ -92,7 +92,7 @@ pub fn spawn_transportation(
 
     let translate: Vec3 = Vec3::new(
         transportation.translate[0] as f32,
-        0.,
+        0.01,
         transportation.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
@@ -126,8 +126,96 @@ impl RoadSegment {
         }
     }
     pub fn new(line: &Vec<[f64; 2]>) -> Self {
-        let mut road_segment = RoadSegment::empty();
+        let width: f32 = 2.;
+        let half_width: f32 = width / 2.;
+        // let mut road_segment = RoadSegment::empty();
+        let mut segm = Self::empty();
+        segm.points = line
+            .iter()
+            .map(|pos| Vec3::new(pos[0] as f32, 0., pos[1] as f32))
+            .collect::<Vec<Vec3>>();
 
-        road_segment
+        // let heightv: Vec3 = Vec3::Y * height;
+        let material_lengh = 1.;
+        let mut len: f32 = 0.;
+
+        for (i, p) in segm.points.iter().enumerate() {
+            // println!("{:?}", &point);
+            let last: bool = i + 1 == segm.points.len();
+            let ix2: u32 = i as u32 * 2;
+            if last {
+                let inx = if last { 0 } else { i + 1 };
+                segm.norm.push(segm.norm[inx]);
+            } else {
+                let (i1, i2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
+                segm.indices.extend(i1);
+                segm.indices.extend(i2);
+                // let point_next = segm.points[i + 1];
+                // let dir: Vec3 = (point_next - *p).normalize();
+                // println!("{:?}", &dir);
+                // let left_norm = Quat::from_rotation_y(FRAC_PI_2).mul_vec3(dir);
+                // segm.norm.push(left_norm);
+                segm.norm.push(Vec3::Y);
+            }
+
+            let i_next: usize = if last { 0 } else { i + 1 };
+            let normal = segm.norm[i];
+            let point: Vec3 = *p;
+            let point_next: Vec3 = segm.points[i_next];
+
+            let point_prev = if i == 0 {
+                segm.points[segm.points.len() - 1]
+            } else {
+                segm.points[i - 1]
+            };
+            let vec_len = (point_prev - point).length();
+            let angle = if vec_len == 0. {
+                0.
+            } else {
+                (point - point_next).angle_between(point_prev - point) / 2.
+            };
+            let dir: Vec3 = (point_next - point).normalize();
+            let left_norm = Quat::from_rotation_y(FRAC_PI_2 + angle).mul_vec3(dir);
+            let right_norm = -left_norm;
+
+            // track.left.push(point + left_norm * width);
+            // track.right.push(point + right_norm * width);
+            let l1 = point + left_norm * half_width;
+            let r1 = point + right_norm * half_width;
+            let l2 = point_next + left_norm * half_width;
+            let r2 = point_next + right_norm * half_width;
+            segm.vertices.push((l1).into());
+            segm.vertices.push((r1).into());
+            segm.vertices.push((l2).into());
+            segm.vertices.push((r2).into());
+
+            // segm.vertices.push((point).into());
+            // segm.vertices.push((point + heightv).into());
+            // segm.vertices.push((point_next).into());
+            // segm.vertices.push((point_next + heightv).into());
+
+            let diff = point_next.sub(point).length();
+            segm.uvs.push([len / material_lengh, 0.]);
+            segm.uvs.push([len / material_lengh, 1.]);
+            segm.uvs.push([len / material_lengh, 0.]);
+            segm.uvs.push([len / material_lengh, 1.]);
+            segm.normals.push(normal.to_array());
+            segm.normals.push(normal.to_array());
+            segm.normals.push(normal.to_array());
+            segm.normals.push(normal.to_array());
+            len += diff;
+        }
+        let points_len = segm.points.len() as u32;
+        segm.indices
+            .extend(segm.indices.clone().iter().map(|ind| ind + points_len * 2));
+
+        // let points_len = wall.points.len() as u32;
+        // let mut indices: Vec<u32> = vec![];
+        // indices.extend(wall.indices.clone());
+        // // indices.extend(wall.indices.iter().map(|ind| ind + points_len * 2));
+        // // indices.extend(wall.indices.iter().map(|ind| ind + points_len * 4));
+        // wall.indices = indices;
+
+        segm
     }
 }
