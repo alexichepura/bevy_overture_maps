@@ -1,8 +1,9 @@
 use clap::{Args, Parser, Subcommand};
 
-use crate::geometry::check_wkb;
+use crate::{geometry::check_wkb, overture_types::get_schema_json};
 
 mod geometry;
+mod overture_types;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -15,6 +16,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     CheckWkb(CheckWkbArgs),
+    GetSchemaJson,
 }
 
 #[derive(Args)]
@@ -32,6 +34,11 @@ async fn main() {
             let bytes_array = serde_json::from_str::<Vec<u8>>(&bytes_string).expect("bytes array");
             check_wkb(bytes_array.as_slice());
             println!("Check WKB end");
+        }
+        Commands::GetSchemaJson => {
+            println!("GetSchemaJson start");
+            get_schema_json();
+            println!("GetSchemaJson end");
         }
     }
 }

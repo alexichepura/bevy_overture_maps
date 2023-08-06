@@ -14,6 +14,36 @@ pub struct TransportationQueryParams {
     pub translate: [f64; 2],
 }
 
+use serde::{Deserialize, Serialize};
+
+// https://docs.overturemaps.org/reference/transportation/segment
+// https://github.com/alexichepura/overture_maps_rs/issues/1
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Road {
+    class: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+enum RoadClass {
+    Motorway,     // - motorway
+    Primary,      // - primary
+    Secondary,    // - secondary
+    Tertiary,     // - tertiary
+    Residential,  // - residential
+    LivingStreet, // - livingStreet # similar as residential but has implied legal restriction for motor vehicles (which can vary country by country)
+    Trunk,        // - trunk
+    Unclassified, // - unclassified # known roads, paved but of low importance which does not meet definition of being motorway, trunk, primary, secondary, tertiary
+    ParkingAisle, // - parkingAisle # service road intended for parking
+    Driveway,     // - driveway # service road intended for deliveries
+    Pedestrian,   // - pedestrian
+    Footway,      // - footway
+    Steps,        // - steps
+    Track,        // - track
+    Cycleway,     // - cycleway
+    Bridleway,    // - bridleway # similar as track but has implied access only for horses
+    Unknown,      // - unknown
+}
+
 pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransportation> {
     let path = "./data.duckdb";
     let conn = Connection::open(&path).unwrap();
@@ -23,7 +53,6 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
     let limit = params.limit;
     let where_string = params.where_string;
     let from = params.from_string;
-    println!("statement for transportation - start");
     let mut stmt = conn
         // .prepare(&format!(
         //     "SELECT
@@ -37,45 +66,52 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         .prepare(&format!(
             "SELECT
                 id,
-                subtype,
                 ST_GeomFromWkb(geometry) AS geometry,
-                road
+                road,
+                level
                 FROM {from}
                 WHERE {where_string}
                 LIMIT {limit}"
         ))
         .unwrap();
-    println!("statement for transportation - end");
     #[derive(Debug)]
     struct Transportation {
         id: String,
-        subtype: Option<String>,
         geom: Vec<u8>,
         road: Option<String>,
+        level: Option<String>,
         // connectors: Option<String>,
     }
     let query_iter = stmt
         .query_map([], |row| {
             Ok(Transportation {
                 id: row.get(0)?,
-                subtype: row.get(1)?,
-                geom: row.get(2)?,
-                road: row.get(3)?,
+                geom: row.get(1)?,
+                road: row.get(2)?,
+                level: row.get(3)?,
                 // connectors: row.get(2)?,
             })
         })
         .unwrap();
 
-    println!("statement for transportation - query loaded");
     let mut bevy_transportations: Vec<BevyTransportation> = vec![];
     for item in query_iter {
         let item = item.unwrap();
-        println!("statement for transportation - item road: {:?}", &item.road);
+
+        if let Some(road) = &item.road {
+            let p: Road = serde_json::from_str(road).expect("road");
+            println!("- item.road: {:?}", road);
+            println!("- item.road json: {:?}", p);
+        }
+        if let Some(level) = &item.level {
+            println!("- item.level: {:?}", level);
+        }
+
         let raw = item.geom;
-        println!(
-            "statement for transportation - item geom: {raw:?}:l={}",
-            raw.len()
-        );
+        // println!(
+        //     "statement for transportation - item geom: {raw:?}:l={}",
+        //     raw.len()
+        // );
         // MAGIC TO GET ARRAY THAT WORKS, COMPARED TO BINARY FROM PARQUET DIRECTLY
         // 0, 1, 104, 0, 0, 0, 0, 0, 1
         let raw = &raw[9..];

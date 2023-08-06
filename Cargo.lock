@@ -986,6 +986,8 @@ dependencies = [
  "geo-types",
  "geozero",
  "parquet",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

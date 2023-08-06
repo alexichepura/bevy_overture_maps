@@ -12,3 +12,5 @@ geo-types = { workspace = true }
 duckdb = { git = "https://github.com/duckdb/duckdb-rs", features = [
 ] } # arrow 44
 parquet = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
