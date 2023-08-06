@@ -11,3 +11,4 @@ geo-types = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
+serde_yaml = "0.9.25"

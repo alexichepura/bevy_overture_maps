@@ -2,6 +2,7 @@ use clap::{Args, Parser, Subcommand};
 
 use crate::{geometry::check_wkb, overture_types::get_schema_json};
 
+mod db;
 mod geometry;
 mod overture_types;
 

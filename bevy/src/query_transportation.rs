@@ -5,6 +5,8 @@ use geozero::wkb::WkbDialect;
 
 use crate::transportation::line_string_road;
 use crate::transportation::BevyTransportation;
+use crate::transportation::Road;
+use crate::transportation::RoadClass;
 
 pub struct TransportationQueryParams {
     pub limit: usize,
@@ -18,31 +20,6 @@ use serde::{Deserialize, Serialize};
 
 // https://docs.overturemaps.org/reference/transportation/segment
 // https://github.com/alexichepura/overture_maps_rs/issues/1
-
-#[derive(Serialize, Deserialize, Debug)]
-struct Road {
-    class: String,
-}
-#[derive(Serialize, Deserialize, Debug)]
-enum RoadClass {
-    Motorway,     // - motorway
-    Primary,      // - primary
-    Secondary,    // - secondary
-    Tertiary,     // - tertiary
-    Residential,  // - residential
-    LivingStreet, // - livingStreet # similar as residential but has implied legal restriction for motor vehicles (which can vary country by country)
-    Trunk,        // - trunk
-    Unclassified, // - unclassified # known roads, paved but of low importance which does not meet definition of being motorway, trunk, primary, secondary, tertiary
-    ParkingAisle, // - parkingAisle # service road intended for parking
-    Driveway,     // - driveway # service road intended for deliveries
-    Pedestrian,   // - pedestrian
-    Footway,      // - footway
-    Steps,        // - steps
-    Track,        // - track
-    Cycleway,     // - cycleway
-    Bridleway,    // - bridleway # similar as track but has implied access only for horses
-    Unknown,      // - unknown
-}
 
 pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransportation> {
     let path = "./data.duckdb";
@@ -67,8 +44,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
             "SELECT
                 id,
                 ST_GeomFromWkb(geometry) AS geometry,
-                road,
-                level
+                road
                 FROM {from}
                 WHERE {where_string}
                 LIMIT {limit}"
@@ -79,7 +55,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         id: String,
         geom: Vec<u8>,
         road: Option<String>,
-        level: Option<String>,
+        // level: Option<u32>,
         // connectors: Option<String>,
     }
     let query_iter = stmt
@@ -88,7 +64,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
                 id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
-                level: row.get(3)?,
+                // level: row.get(3)?,
                 // connectors: row.get(2)?,
             })
         })
@@ -98,14 +74,9 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
     for item in query_iter {
         let item = item.unwrap();
 
-        if let Some(road) = &item.road {
-            let p: Road = serde_json::from_str(road).expect("road");
-            println!("- item.road: {:?}", road);
-            println!("- item.road json: {:?}", p);
-        }
-        if let Some(level) = &item.level {
-            println!("- item.level: {:?}", level);
-        }
+        // if let Some(level) = &item.level {
+        //     println!("- item.level: {:?}", level);
+        // }
 
         let raw = item.geom;
         // println!(
@@ -122,10 +93,20 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         match g {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
-                    let bevy_transportation =
-                        line_string_road(line_string, params.k, params.translate);
-                    bevy_transportations.push(bevy_transportation);
-                    // dbg!(line_string);
+                    if let Some(road) = &item.road {
+                        let (translate, line) =
+                            line_string_road(line_string, params.k, params.translate);
+                        let p: Road = serde_json::from_str(road).expect("road");
+                        let road_class: RoadClass = RoadClass::from_string(&p.class);
+                        let bevy_transportation = BevyTransportation {
+                            translate,
+                            line,
+                            k: params.k,
+                            road_class,
+                        };
+                        bevy_transportations.push(bevy_transportation);
+                        // dbg!(line_string);
+                    }
                 }
                 Geometry::Polygon(polygon) => {
                     dbg!(polygon);

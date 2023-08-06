@@ -2,14 +2,65 @@ use bevy::{prelude::*, render::mesh::*};
 use geo::algorithm::Vector2DOps;
 use geo::geodesic_distance::GeodesicDistance;
 use geo_types::LineString;
+use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
 use std::ops::{Add, Neg, Sub};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Road {
+    pub class: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub enum RoadClass {
+    Motorway,     // - motorway
+    Primary,      // - primary
+    Secondary,    // - secondary
+    Tertiary,     // - tertiary
+    Residential,  // - residential
+    LivingStreet, // - livingStreet # similar as residential but has implied legal restriction for motor vehicles (which can vary country by country)
+    Trunk,        // - trunk
+    Unclassified, // - unclassified # known roads, paved but of low importance which does not meet definition of being motorway, trunk, primary, secondary, tertiary
+    ParkingAisle, // - parkingAisle # service road intended for parking
+    Driveway,     // - driveway # service road intended for deliveries
+    Pedestrian,   // - pedestrian
+    Footway,      // - footway
+    Steps,        // - steps
+    Track,        // - track
+    Cycleway,     // - cycleway
+    Bridleway,    // - bridleway # similar as track but has implied access only for horses
+    Unknown,      // - unknown
+}
+impl RoadClass {
+    pub fn from_string(s: &String) -> RoadClass {
+        match s.as_str() {
+            "motorway" => RoadClass::Motorway,
+            "primary" => RoadClass::Primary,
+            "secondary" => RoadClass::Secondary,
+            "tertiary" => RoadClass::Tertiary,
+            "residential" => RoadClass::Residential,
+            "livingStreet" => RoadClass::LivingStreet,
+            "trunk" => RoadClass::Trunk,
+            "unclassified" => RoadClass::Unclassified,
+            "parkingAisle" => RoadClass::ParkingAisle,
+            "driveway" => RoadClass::Driveway,
+            "pedestrian" => RoadClass::Pedestrian,
+            "footway" => RoadClass::Footway,
+            "steps" => RoadClass::Steps,
+            "track" => RoadClass::Track,
+            "cycleway" => RoadClass::Cycleway,
+            "bridleway" => RoadClass::Bridleway,
+            "unknown" => RoadClass::Unknown,
+            _ => RoadClass::Unknown,
+        }
+    }
+}
 
 #[derive(Component, Debug)]
 pub struct BevyTransportation {
     pub translate: [f64; 2],
     pub line: Vec<[f64; 2]>,
     pub k: f64,
+    pub road_class: RoadClass,
     // pub vertices: Vec<[f64; 3]>,
     // pub triangle_indices: Vec<u32>,
 }
@@ -18,7 +69,11 @@ pub struct BevyTransportation {
 pub struct BevyTransportations {
     pub transportations: Vec<BevyTransportation>,
 }
-pub fn line_string_road(line_string: LineString, k: f64, base: [f64; 2]) -> BevyTransportation {
+pub fn line_string_road(
+    line_string: LineString,
+    k: f64,
+    base: [f64; 2],
+) -> ([f64; 2], Vec<[f64; 2]>) {
     let c1 = line_string
         .coords()
         .nth(0)
@@ -34,7 +89,7 @@ pub fn line_string_road(line_string: LineString, k: f64, base: [f64; 2]) -> Bevy
             ]
         })
         .collect();
-    BevyTransportation { translate, line, k }
+    (translate, line)
 }
 // pub fn line_string_base(line_string: &LineString) -> (f64, [f64; 2]) {
 //     let c1 = line_string
@@ -94,9 +149,29 @@ pub fn spawn_transportation(
         transportation.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
+    let color: Color = match transportation.road_class {
+        RoadClass::Motorway => Color::FUCHSIA,
+        RoadClass::Primary => Color::BEIGE,
+        RoadClass::Secondary => Color::YELLOW,
+        RoadClass::Tertiary => Color::ANTIQUE_WHITE,
+        RoadClass::Residential => Color::GRAY,
+        RoadClass::LivingStreet => Color::SALMON,
+        RoadClass::Trunk => Color::ORANGE_RED,
+        RoadClass::Unclassified => Color::WHITE,
+        RoadClass::ParkingAisle => Color::AZURE,
+        RoadClass::Driveway => Color::OLIVE,
+        RoadClass::Pedestrian => Color::CRIMSON,
+        RoadClass::Footway => Color::INDIGO,
+        RoadClass::Steps => Color::SILVER,
+        RoadClass::Track => Color::BLUE,
+        RoadClass::Cycleway => Color::GREEN,
+        RoadClass::Bridleway => Color::DARK_GREEN,
+        RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
+        _ => Color::rgb(0.1, 0.1, 0.3),
+    };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(Color::rgb(0.1, 0.1, 0.3).into()),
+        material: materials.add(color.into()),
         transform,
         ..Default::default()
     },));

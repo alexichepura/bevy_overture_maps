@@ -39,7 +39,7 @@ fn main() {
     let translate: [f64; 2] = [lon * k, lat * k];
 
     let bevy_transportation = query_transportation(TransportationQueryParams {
-        limit: 10,
+        limit: 10000,
         from_string: "read_parquet('../overture/type=segment/*')".to_string(),
         where_string: query.clone(),
         k,
@@ -47,7 +47,7 @@ fn main() {
     });
 
     let bevy_buildings = duckdb_query_buildings(BuildingsQueryParams {
-        limit: 10,
+        limit: 10000,
         from_string: "read_parquet('../overture/theme=buildings/type=building/*')".to_string(),
         where_string: query,
         k,

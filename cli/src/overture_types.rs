@@ -1,4 +1,3 @@
-use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 
 // https://github.com/OvertureMaps/schema/blob/main/schema/schema.yaml
