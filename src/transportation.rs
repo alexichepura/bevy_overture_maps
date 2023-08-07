@@ -196,7 +196,7 @@ impl RoadSegment {
         }
     }
     pub fn new(line: &Vec<[f64; 2]>) -> Self {
-        let width: f32 = 2.;
+        let width: f32 = 8.;
         let half_width: f32 = width / 2.;
         // let mut road_segment = RoadSegment::empty();
         let mut segm = Self::empty();
@@ -233,19 +233,8 @@ impl RoadSegment {
             let point: Vec3 = *p;
             let point_next: Vec3 = segm.points[i_next];
 
-            let point_prev = if i == 0 {
-                segm.points[segm.points.len() - 1]
-            } else {
-                segm.points[i - 1]
-            };
-            let vec_len = (point_prev - point).length();
-            let angle = if vec_len == 0. {
-                0.
-            } else {
-                (point - point_next).angle_between(point_prev - point) / 2.
-            };
             let dir: Vec3 = (point_next - point).normalize();
-            let left_norm = Quat::from_rotation_y(FRAC_PI_2 + angle).mul_vec3(dir);
+            let left_norm = Quat::from_rotation_y(FRAC_PI_2).mul_vec3(dir);
             let right_norm = -left_norm;
 
             // track.left.push(point + left_norm * width);
