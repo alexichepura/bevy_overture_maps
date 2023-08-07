@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 
 // https://github.com/OvertureMaps/schema/blob/main/schema/schema.yaml
-pub fn schema_types() {
+pub fn _schema_types() {
     // schemafy::schemafy!("../../overture_maps_schema/schema/schema.yaml");
     // schemafy::schemafy!("src/schema.json");
 }

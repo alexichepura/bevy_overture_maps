@@ -7,8 +7,6 @@ pub fn parquet_import() {
     // let path = "theme=admins/type=locality/20230725_211237_00132_5p54t_0fa79fec-7a39-4f51-90a6-aa94b553befd";
     // let path = "theme=buildings/type=building/20230725_211555_00082_tpd52_00e93efa-24f4-4014-b65a-38c7d2854ab4";
     // let path = format!("../overture/{path}");
-    // let path = format!("./buildings-japan.parquet");
-    // let path = format!("./buildings-japan.parquet");
     let path = format!(
         "../overture/type=segment/20230726_134827_00007_dg6b6_09951677-6217-4b2f-b579-287ffed08510"
     );

@@ -26,30 +26,17 @@ fn main() {
     let lonlatname = format!("{lon}-{lat}-{name}");
     println!("{lonlatname}");
 
-    let shift = 0.01;
-    let lat_max = lat + shift;
-    let lat_min = lat - shift;
-    let lon_max = lon + shift;
-    let lon_min = lon - shift;
-
-    let polygon_str = format!("{lon_min} {lat_min}, {lon_min} {lat_max}, {lon_max} {lat_max}, {lon_max} {lat_min}, {lon_min} {lat_min}", );
-    let query = format!("ST_Within(ST_GeomFromWkb(geometry), ST_Envelope(ST_GeomFromText('POLYGON(({polygon_str}))')))");
-
     let k = geodesic_to_coord(Coord { x: lon, y: lat });
     let translate: [f64; 2] = [lon * k, lat * k];
 
     let bevy_transportation = query_transportation(TransportationQueryParams {
-        limit: 10000,
         from_string: format!("read_parquet('parquet/{lonlatname}-transportation.parquet')"),
-        where_string: query.clone(),
         k,
         translate,
     });
 
     let bevy_buildings = duckdb_query_buildings(BuildingsQueryParams {
-        limit: 10000,
         from_string: format!("read_parquet('parquet/{lonlatname}-building.parquet')"),
-        where_string: query,
         k,
         translate,
     });

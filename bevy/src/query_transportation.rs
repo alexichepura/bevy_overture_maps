@@ -9,14 +9,10 @@ use crate::transportation::Road;
 use crate::transportation::RoadClass;
 
 pub struct TransportationQueryParams {
-    pub limit: usize,
-    pub where_string: String,
     pub from_string: String,
     pub k: f64,
     pub translate: [f64; 2],
 }
-
-use serde::{Deserialize, Serialize};
 
 // https://docs.overturemaps.org/reference/transportation/segment
 // https://github.com/alexichepura/overture_maps_rs/issues/1
@@ -27,41 +23,30 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
-    let limit = params.limit;
-    let where_string = params.where_string;
     let from = params.from_string;
     let mut stmt = conn
-        // .prepare(&format!(
-        //     "SELECT
-        //         id,
-        //         subtype,
-        //         ST_GeomFromWkb(geometry) AS geometry
-        //         FROM {from}
-        //         WHERE id='segment.87269954dffffff-13F6AD9C53A876A2'
-        //         LIMIT {limit}"
-        // ))
         .prepare(&format!(
             "SELECT
                 id,
                 ST_GeomFromWkb(geometry) AS geometry,
                 road
-                FROM {from}
-                WHERE {where_string}
-                LIMIT {limit}"
+                FROM {from}"
         ))
         .unwrap();
     #[derive(Debug)]
     struct Transportation {
-        id: String,
+        // id: String,
         geom: Vec<u8>,
         road: Option<String>,
         // level: Option<u32>,
         // connectors: Option<String>,
     }
+
+    let now = std::time::Instant::now();
     let query_iter = stmt
         .query_map([], |row| {
             Ok(Transportation {
-                id: row.get(0)?,
+                // id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
                 // level: row.get(3)?,
@@ -69,7 +54,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
             })
         })
         .unwrap();
-
+    println!("{:?}", now.elapsed());
     let mut bevy_transportations: Vec<BevyTransportation> = vec![];
     for item in query_iter {
         let item = item.unwrap();

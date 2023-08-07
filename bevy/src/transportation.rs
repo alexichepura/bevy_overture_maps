@@ -1,10 +1,8 @@
 use bevy::{prelude::*, render::mesh::*};
-use geo::algorithm::Vector2DOps;
-use geo::geodesic_distance::GeodesicDistance;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
-use std::ops::{Add, Neg, Sub};
+use std::ops::Sub;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Road {
@@ -167,7 +165,6 @@ pub fn spawn_transportation(
         RoadClass::Cycleway => Color::GREEN,
         RoadClass::Bridleway => Color::DARK_GREEN,
         RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
-        _ => Color::rgb(0.1, 0.1, 0.3),
     };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),

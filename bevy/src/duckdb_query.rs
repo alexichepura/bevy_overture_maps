@@ -10,8 +10,6 @@ use crate::building::{polygon_building, BevyBuilding};
 // https://github.com/shi-works/Overture-Maps-Data-for-GIS // japan
 
 pub struct BuildingsQueryParams {
-    pub limit: usize,
-    pub where_string: String,
     pub from_string: String,
     pub k: f64,
     pub translate: [f64; 2],
@@ -38,8 +36,6 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
     //             100",
     //     )
     //     .unwrap();
-    let limit = params.limit;
-    let where_string = params.where_string;
     let from = params.from_string;
     let mut stmt = conn
         .prepare(
@@ -49,9 +45,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
                 height,
                 JSON(names) as names,
                 ST_GeomFromWkb(geometry) AS geometry
-            FROM {from}
-            WHERE {where_string}
-            LIMIT {limit}"
+            FROM {from}"
             ),
             // WHERE
             //     bbox.minX > 139.69170 AND bbox.maxX < 139.70170 AND bbox.minY > 35.68951 AND bbox.maxY < 35.69951",
