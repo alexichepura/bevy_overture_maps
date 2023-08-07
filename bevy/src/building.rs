@@ -59,6 +59,12 @@ pub fn polygon_building(
             ]
         })
         .collect();
+    // println!("line l:{} :{:?}", line.len(), &line);
+    // let is_last_eq_first = line.first() == line.last();
+    // if !is_last_eq_first {
+    //     println!("is_last_eq_first:{is_last_eq_first}-{:?}", &line);
+    // }
+
     let triangles = polygon.earcut_triangles_raw();
     BevyBuilding {
         translate,
@@ -95,22 +101,23 @@ pub fn buildings_start(
     }
 }
 
-// pub fn buildings_update(buildings_res: Res<BevyBuildings>, mut gizmos: Gizmos) {
-//     for b in buildings_res.buildings.iter() {
-//         let height: f32 = match b.height {
-//             Some(h) => h as f32,
-//             None => 10.,
-//         };
-//         let wall = Wall::new(&b.line, height);
+pub fn _buildings_update(buildings_res: Res<BevyBuildings>, mut gizmos: Gizmos) {
+    for b in buildings_res.buildings.iter() {
+        let height: f32 = match b.height {
+            Some(h) => h as f32,
+            None => 10.,
+        };
+        let wall = Wall::new(&b.line, height);
 
-//         for (i, n) in wall.normals.iter().enumerate() {
-//             let n = Vec3::new(n[0], n[1], n[2]);
-//             let v = wall.vertices[i];
-//             let v = Vec3::new(v[0], v[1] + 0.01, v[2]);
-//             gizmos.line(v, v + n, Color::rgb(0.5, 0.3, 0.3));
-//         }
-//     }
-// }
+        for (i, n) in wall.normals.iter().enumerate() {
+            let tr = Vec3::new(b.translate[0] as f32, 0., b.translate[1] as f32);
+            let n = Vec3::new(n[0], n[1], n[2]);
+            let v = wall.vertices[i];
+            let v = Vec3::new(v[0], v[1] + 0.01, v[2]);
+            gizmos.line(tr + v, tr + v + n, Color::rgb(0.5, 0.3, 0.3));
+        }
+    }
+}
 
 pub fn spawn_building(
     cmd: &mut Commands,
@@ -133,7 +140,6 @@ pub fn spawn_building(
     //     wall.indices.len(),
     //     wall.normals.len(),
     // );
-    // println!("indices: {:?}", &wall.indices);
 
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(
@@ -228,14 +234,15 @@ impl Wall {
         let heightv: Vec3 = Vec3::Y * height;
         let material_lengh = 1.;
         let mut len: f32 = 0.;
+        let points_len = wall.points.len();
 
         for (i, p) in wall.points.iter().enumerate() {
             // println!("{:?}", &point);
-            let last: bool = i + 1 == wall.points.len();
-            let ix2: u32 = i as u32 * 2;
+            let last: bool = i + 1 == points_len;
+            let ix2: u32 = i as u32 * 4;
             if last {
                 let inx = if last { 0 } else { i + 1 };
-                wall.norm.push(wall.norm[inx]);
+                // wall.norm.push(wall.norm[inx]);
             } else {
                 let (i1, i2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
                 wall.indices.extend(i1);
@@ -245,31 +252,34 @@ impl Wall {
                 // println!("{:?}", &dir);
                 let left_norm = Quat::from_rotation_y(FRAC_PI_2).mul_vec3(dir);
                 wall.norm.push(left_norm);
+                let i_next: usize = if last { 0 } else { i + 1 };
+                let normal = wall.norm[i];
+                let point: Vec3 = *p;
+                let point_next: Vec3 = wall.points[i_next];
+                wall.vertices.push((point).into());
+                wall.vertices.push((point + heightv).into());
+                wall.vertices.push((point_next).into());
+                wall.vertices.push((point_next + heightv).into());
+
+                let diff = point_next.sub(point).length();
+                wall.uvs.push([len / material_lengh, 0.]);
+                wall.uvs.push([len / material_lengh, 1.]);
+                wall.uvs.push([len / material_lengh, 0.]);
+                wall.uvs.push([len / material_lengh, 1.]);
+                wall.normals.push(normal.to_array());
+                wall.normals.push(normal.to_array());
+                wall.normals.push(normal.to_array());
+                wall.normals.push(normal.to_array());
+                len += diff;
             }
-
-            let i_next: usize = if last { 0 } else { i + 1 };
-            let normal = wall.norm[i];
-            let point: Vec3 = *p;
-            let point_next: Vec3 = wall.points[i_next];
-            wall.vertices.push((point).into());
-            wall.vertices.push((point + heightv).into());
-            wall.vertices.push((point_next).into());
-            wall.vertices.push((point_next + heightv).into());
-
-            let diff = point_next.sub(point).length();
-            wall.uvs.push([len / material_lengh, 0.]);
-            wall.uvs.push([len / material_lengh, 1.]);
-            wall.uvs.push([len / material_lengh, 0.]);
-            wall.uvs.push([len / material_lengh, 1.]);
-            wall.normals.push(normal.to_array());
-            wall.normals.push(normal.to_array());
-            wall.normals.push(normal.to_array());
-            wall.normals.push(normal.to_array());
-            len += diff;
         }
-        let points_len = wall.points.len() as u32;
-        wall.indices
-            .extend(wall.indices.clone().iter().map(|ind| ind + points_len * 2));
+
+        wall.indices.extend(
+            wall.indices
+                .clone()
+                .iter()
+                .map(|ind| ind + points_len as u32 * 2),
+        );
 
         // let points_len = wall.points.len() as u32;
         // let mut indices: Vec<u32> = vec![];

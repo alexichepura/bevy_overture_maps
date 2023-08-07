@@ -11,6 +11,7 @@ use crate::building::{polygon_building, BevyBuilding};
 
 pub struct BuildingsQueryParams {
     pub from_string: String,
+    pub limit: Option<u32>,
     pub k: f64,
     pub translate: [f64; 2],
 }
@@ -37,6 +38,10 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
     //     )
     //     .unwrap();
     let from = params.from_string;
+    let limit: String = match params.limit {
+        Some(l) => format!("LIMIT {}", l),
+        None => String::from(""),
+    };
     let mut stmt = conn
         .prepare(
             &format!(
@@ -45,7 +50,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
                 height,
                 JSON(names) as names,
                 ST_GeomFromWkb(geometry) AS geometry
-            FROM {from}"
+            FROM {from} {limit}"
             ),
             // WHERE
             //     bbox.minX > 139.69170 AND bbox.maxX < 139.70170 AND bbox.minY > 35.68951 AND bbox.maxY < 35.69951",

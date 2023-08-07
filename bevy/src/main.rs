@@ -37,6 +37,7 @@ fn main() {
 
     let bevy_buildings = duckdb_query_buildings(BuildingsQueryParams {
         from_string: format!("read_parquet('parquet/{lonlatname}-building.parquet')"),
+        limit: None,
         k,
         translate,
     });
