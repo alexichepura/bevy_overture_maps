@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.3", features = ["derive"] }
+duckdb = { workspace = true }
 geo = { workspace = true }
 geozero = { workspace = true }
 geo-types = { workspace = true }

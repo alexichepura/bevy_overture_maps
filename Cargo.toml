@@ -11,13 +11,15 @@ resolver = "2"
 members = ["bevy", "cli"]
 
 [workspace.dependencies]
-bevy = { version = "0.11", features = ["jpeg"] }
 arrow = { version = "44.0.0", features = [
     "ipc",
     "test_utils",
     "prettyprint",
     "json",
 ] }
+bevy = { version = "0.11", features = ["jpeg"] }
+duckdb = { git = "https://github.com/duckdb/duckdb-rs", features = [
+] } # arrow 44
 # geo = { version = "0.26.0", features = [] }
 geo = { git = "https://github.com/georust/geo" }          # Vector2DOps
 geozero = { version = "0.10.0", features = ["with-wkb"] }

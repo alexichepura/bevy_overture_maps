@@ -995,6 +995,7 @@ name = "bevy_overture_cli"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "duckdb",
  "geo",
  "geo-types",
  "geozero",
