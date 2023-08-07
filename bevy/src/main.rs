@@ -18,11 +18,11 @@ mod query_transportation;
 mod transportation;
 
 fn main() {
-    let lat = std::env::var("BEVY_OVERTURE_LAT").expect("BEVY_OVERTURE_LAT env");
+    let lat = std::env::var("MAP_LAT").expect("MAP_LAT env");
     let lat = lat.parse::<f64>().expect("lat to be f64");
-    let lon = std::env::var("BEVY_OVERTURE_LON").expect("BEVY_OVERTURE_LON env");
+    let lon = std::env::var("MAP_LON").expect("MAP_LON env");
     let lon = lon.parse::<f64>().expect("lon to be f64");
-    let name = std::env::var("BEVY_OVERTURE_NAME").expect("BEVY_OVERTURE_NAME env");
+    let name = std::env::var("MAP_NAME").expect("MAP_NAME env");
     let lonlatname = format!("{lon}-{lat}-{name}");
     println!("{lonlatname}");
 
