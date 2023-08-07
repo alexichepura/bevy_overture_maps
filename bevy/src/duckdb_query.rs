@@ -3,7 +3,7 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::building::{polygon_building, BevyBuilding};
+use crate::building::{polygon_building, Building};
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
@@ -16,7 +16,7 @@ pub struct BuildingsQueryParams {
     pub translate: [f64; 2],
 }
 
-pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding> {
+pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     let path = "./data.duckdb";
     let conn = Connection::open(&path).unwrap();
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();
@@ -57,7 +57,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         )
         .unwrap();
     #[derive(Debug)]
-    struct Bb {
+    struct DbBuilding {
         // id: String,
         height: Option<f64>,
         // names: String,
@@ -66,7 +66,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
     }
     let query_iter = stmt
         .query_map([], |row| {
-            Ok(Bb {
+            Ok(DbBuilding {
                 // id: row.get(0)?,
                 height: row.get(1)?,
                 // names: row.get(2)?,
@@ -76,7 +76,7 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         })
         .unwrap();
 
-    let mut bevy_buildings: Vec<BevyBuilding> = vec![];
+    let mut buildings: Vec<Building> = vec![];
     for query_item in query_iter {
         let query_item = query_item.unwrap();
         // println!("{:?}", &query_item);
@@ -90,9 +90,9 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
         match g {
             Ok(g) => match g {
                 Geometry::Polygon(polygon) => {
-                    let bevy_building =
+                    let building =
                         polygon_building(polygon, params.k, params.translate, query_item.height);
-                    bevy_buildings.push(bevy_building);
+                    buildings.push(building);
                 }
                 not_polygon => {
                     dbg!(&not_polygon);
@@ -103,5 +103,5 @@ pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<BevyBuilding>
             }
         }
     }
-    bevy_buildings
+    buildings
 }

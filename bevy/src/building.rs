@@ -5,7 +5,7 @@ use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 
 #[derive(Component, Debug)]
-pub struct BevyBuilding {
+pub struct Building {
     pub translate: [f64; 2],
     pub height: Option<f64>,
     pub line: Vec<[f64; 2]>,
@@ -15,8 +15,8 @@ pub struct BevyBuilding {
 }
 
 #[derive(Resource, Debug)]
-pub struct BevyBuildings {
-    pub buildings: Vec<BevyBuilding>,
+pub struct Buildings {
+    pub buildings: Vec<Building>,
 }
 // pub fn polygon_base(polygon: &Polygon) -> (f64, [f64; 2]) {
 //     let exterior = polygon.exterior();
@@ -37,12 +37,7 @@ pub struct BevyBuildings {
 //     (k, first_point_position)
 // }
 
-pub fn polygon_building(
-    polygon: Polygon,
-    k: f64,
-    base: [f64; 2],
-    height: Option<f64>,
-) -> BevyBuilding {
+pub fn polygon_building(polygon: Polygon, k: f64, base: [f64; 2], height: Option<f64>) -> Building {
     let exterior = polygon.exterior();
     let c1 = exterior
         .coords()
@@ -66,7 +61,7 @@ pub fn polygon_building(
     // }
 
     let triangles = polygon.earcut_triangles_raw();
-    BevyBuilding {
+    Building {
         translate,
         height,
         line,
@@ -94,14 +89,14 @@ pub fn buildings_start(
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    buildings_res: Res<BevyBuildings>,
+    buildings_res: Res<Buildings>,
 ) {
     for b in buildings_res.buildings.iter() {
         spawn_building(&mut cmd, &mut meshes, &mut materials, b);
     }
 }
 
-pub fn _buildings_update(buildings_res: Res<BevyBuildings>, mut gizmos: Gizmos) {
+pub fn _buildings_update(buildings_res: Res<Buildings>, mut gizmos: Gizmos) {
     for b in buildings_res.buildings.iter() {
         let height: f32 = match b.height {
             Some(h) => h as f32,
@@ -123,7 +118,7 @@ pub fn spawn_building(
     cmd: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    building: &BevyBuilding,
+    building: &Building,
 ) {
     let height: f32 = match building.height {
         Some(h) => h as f32,
@@ -241,8 +236,6 @@ impl Wall {
             let last: bool = i + 1 == points_len;
             let ix2: u32 = i as u32 * 4;
             if last {
-                let inx = if last { 0 } else { i + 1 };
-                // wall.norm.push(wall.norm[inx]);
             } else {
                 let (i1, i2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
                 wall.indices.extend(i1);

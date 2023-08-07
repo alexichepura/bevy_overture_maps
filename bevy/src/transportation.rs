@@ -54,7 +54,7 @@ impl RoadClass {
 }
 
 #[derive(Component, Debug)]
-pub struct BevyTransportation {
+pub struct Transportation {
     pub translate: [f64; 2],
     pub line: Vec<[f64; 2]>,
     pub k: f64,
@@ -65,7 +65,7 @@ pub struct BevyTransportation {
 
 #[derive(Resource, Debug)]
 pub struct BevyTransportations {
-    pub transportations: Vec<BevyTransportation>,
+    pub transportations: Vec<Transportation>,
 }
 pub fn line_string_road(
     line_string: LineString,
@@ -122,7 +122,7 @@ pub fn spawn_transportation(
     cmd: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
-    transportation: &BevyTransportation,
+    transportation: &Transportation,
 ) {
     let segment = RoadSegment::new(&transportation.line);
 

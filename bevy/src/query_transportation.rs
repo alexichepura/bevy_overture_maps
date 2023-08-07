@@ -4,9 +4,9 @@ use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
 use crate::transportation::line_string_road;
-use crate::transportation::BevyTransportation;
 use crate::transportation::Road;
 use crate::transportation::RoadClass;
+use crate::transportation::Transportation;
 
 pub struct TransportationQueryParams {
     pub from_string: String,
@@ -17,7 +17,7 @@ pub struct TransportationQueryParams {
 // https://docs.overturemaps.org/reference/transportation/segment
 // https://github.com/alexichepura/overture_maps_rs/issues/1
 
-pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransportation> {
+pub fn query_transportation(params: TransportationQueryParams) -> Vec<Transportation> {
     let path = "./data.duckdb";
     let conn = Connection::open(&path).unwrap();
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();
@@ -34,7 +34,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         ))
         .unwrap();
     #[derive(Debug)]
-    struct Transportation {
+    struct DbTransportation {
         // id: String,
         geom: Vec<u8>,
         road: Option<String>,
@@ -45,7 +45,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
     let now = std::time::Instant::now();
     let query_iter = stmt
         .query_map([], |row| {
-            Ok(Transportation {
+            Ok(DbTransportation {
                 // id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
@@ -55,7 +55,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         })
         .unwrap();
     println!("{:?}", now.elapsed());
-    let mut bevy_transportations: Vec<BevyTransportation> = vec![];
+    let mut transportations: Vec<Transportation> = vec![];
     for item in query_iter {
         let item = item.unwrap();
 
@@ -83,13 +83,13 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
                             line_string_road(line_string, params.k, params.translate);
                         let p: Road = serde_json::from_str(road).expect("road");
                         let road_class: RoadClass = RoadClass::from_string(&p.class);
-                        let bevy_transportation = BevyTransportation {
+                        let transportation = Transportation {
                             translate,
                             line,
                             k: params.k,
                             road_class,
                         };
-                        bevy_transportations.push(bevy_transportation);
+                        transportations.push(transportation);
                         // dbg!(line_string);
                     }
                 }
@@ -109,5 +109,5 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<BevyTransp
         }
     }
 
-    bevy_transportations
+    transportations
 }
