@@ -6,11 +6,10 @@ edition = "2021"
 [dependencies]
 arrow = { workspace = true }
 bevy = { workspace = true }
+duckdb = { workspace = true }
 geo = { workspace = true }
 geozero = { workspace = true }
 geo-types = { workspace = true }
-duckdb = { git = "https://github.com/duckdb/duckdb-rs", features = [
-] } # arrow 44
 parquet = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

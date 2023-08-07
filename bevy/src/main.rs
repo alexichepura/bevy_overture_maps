@@ -18,13 +18,13 @@ mod query_transportation;
 mod transportation;
 
 fn main() {
-    // parquet_import::parquet_import();
-    let lat = std::env::var("BEVY_OVERTURE_LAT").expect("BEVY_OVERTURE_LAT env");
-    dbg!(&lat);
+    let lat = std::env::var("MAP_LAT").expect("MAP_LAT env");
     let lat = lat.parse::<f64>().expect("lat to be f64");
-
-    let lon = std::env::var("BEVY_OVERTURE_LON").expect("BEVY_OVERTURE_LON env");
+    let lon = std::env::var("MAP_LON").expect("MAP_LON env");
     let lon = lon.parse::<f64>().expect("lon to be f64");
+    let name = std::env::var("MAP_NAME").expect("MAP_NAME env");
+    let lonlatname = format!("{lon}-{lat}-{name}");
+    println!("{lonlatname}");
 
     let shift = 0.01;
     let lat_max = lat + shift;
@@ -40,7 +40,7 @@ fn main() {
 
     let bevy_transportation = query_transportation(TransportationQueryParams {
         limit: 10000,
-        from_string: "read_parquet('../overture/type=segment/*')".to_string(),
+        from_string: format!("read_parquet('parquet/{lonlatname}-transportation.parquet')"),
         where_string: query.clone(),
         k,
         translate,
@@ -48,7 +48,7 @@ fn main() {
 
     let bevy_buildings = duckdb_query_buildings(BuildingsQueryParams {
         limit: 10000,
-        from_string: "read_parquet('../overture/theme=buildings/type=building/*')".to_string(),
+        from_string: format!("read_parquet('parquet/{lonlatname}-building.parquet')"),
         where_string: query,
         k,
         translate,

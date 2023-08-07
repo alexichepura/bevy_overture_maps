@@ -1,6 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 
-use crate::{geometry::check_wkb, overture_types::get_schema_json};
+use crate::{db::cache_location, geometry::check_wkb, overture_types::get_schema_json};
 
 mod db;
 mod geometry;
@@ -18,11 +18,18 @@ struct Cli {
 enum Commands {
     CheckWkb(CheckWkbArgs),
     GetSchemaJson,
+    Location(LocationArgs),
 }
 
 #[derive(Args)]
 struct CheckWkbArgs {
     bytes: String,
+}
+#[derive(Args)]
+struct LocationArgs {
+    lon: String, // x
+    lat: String, // y
+    name: String,
 }
 
 #[tokio::main]
@@ -40,6 +47,13 @@ async fn main() {
             println!("GetSchemaJson start");
             get_schema_json();
             println!("GetSchemaJson end");
+        }
+        Commands::Location(args) => {
+            println!("Location start");
+            let lon = args.lon.parse::<f64>().expect("lon to be f64");
+            let lat = args.lat.parse::<f64>().expect("lat to be f64");
+            cache_location(lon, lat, &args.name);
+            println!("Location end");
         }
     }
 }
