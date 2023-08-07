@@ -1,5 +1,5 @@
 [package]
-name = "bevy_overture_cli"
+name = "bevy_overture_maps_cli"
 version = "0.1.0"
 edition = "2021"
 

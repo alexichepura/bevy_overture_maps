@@ -976,21 +976,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_overture_cli"
-version = "0.1.0"
-dependencies = [
- "clap",
- "duckdb",
- "geo",
- "geo-types",
- "geozero",
- "serde",
- "serde_json",
- "serde_yaml",
- "tokio",
-]
-
-[[package]]
 name = "bevy_overture_maps"
 version = "0.1.0"
 dependencies = [
@@ -1019,6 +1004,21 @@ dependencies = [
  "parquet",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "bevy_overture_maps_cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "duckdb",
+ "geo",
+ "geo-types",
+ "geozero",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "tokio",
 ]
 
 [[package]]

@@ -1,7 +1,5 @@
-# bevy_overture 
+# bevy_overture_maps
 Bevy overture is an example of integration between <https://overturemaps.org> and <https://bevyengine.org/>
-
-
 
 https://github.com/alexichepura/bevy_overture/assets/5582266/14a074e3-d520-4035-b78f-4d42ea2872ce
 
@@ -13,18 +11,18 @@ Only segments `aws s3 cp --region us-west-2 --no-sign-request --recursive s3://o
 Only buildings `aws s3 cp --region us-west-2 --no-sign-request --recursive s3://overturemaps-us-west-2/release/2023-07-26-alpha.0/theme=buildings/ ./theme=buildings/`
 
 Example location
-`bevy_overture_cli location <LON> <LAT> <NAME>`
+`bevy_overture_maps_cli location <LON> <LAT> <NAME>`
 ```sh
 cargo cli location 139.69170 35.68951 tokyo
 ```
 
 !!! Fill `.env`, see `.env.example` !!!
 
-Run bevy. `cargo run --release -p=bevy_overture`
+Run bevy.
 ```sh
-cargo run --release -p=bevy_overture
+cargo run --release -p=bevy_overture_maps_app
  # or
-cargo bevy
+cargo app
 ```
 
 ## License
