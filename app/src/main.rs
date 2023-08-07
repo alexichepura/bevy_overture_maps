@@ -1,21 +1,15 @@
 use bevy::init_bevy;
-use duckdb_query::{duckdb_query_buildings, BuildingsQueryParams};
-
+use bevy_overture_maps::{
+    geodesic_to_coord, query_buildings, query_transportation, BuildingsQueryParams,
+    TransportationQueryParams,
+};
 use geo_types::Coord;
-use query_transportation::{query_transportation, TransportationQueryParams};
-
-use crate::geo_util::geodesic_to_coord;
 
 mod bevy;
-mod building;
 mod camera;
-mod duckdb_query;
-mod geo_util;
 mod ground;
 mod light;
 mod parquet_import;
-mod query_transportation;
-mod transportation;
 
 fn main() {
     let lat = std::env::var("MAP_LAT").expect("MAP_LAT env");
@@ -35,7 +29,7 @@ fn main() {
         translate,
     });
 
-    let bevy_buildings = duckdb_query_buildings(BuildingsQueryParams {
+    let bevy_buildings = query_buildings(BuildingsQueryParams {
         from_string: format!("read_parquet('parquet/{lonlatname}-building.parquet')"),
         limit: None,
         k,

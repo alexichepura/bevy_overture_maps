@@ -976,21 +976,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_overture"
-version = "0.1.0"
-dependencies = [
- "arrow",
- "bevy",
- "duckdb",
- "geo",
- "geo-types",
- "geozero",
- "parquet",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "bevy_overture_cli"
 version = "0.1.0"
 dependencies = [
@@ -1006,8 +991,35 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_overture_workspace"
+name = "bevy_overture_maps"
 version = "0.1.0"
+dependencies = [
+ "arrow",
+ "bevy",
+ "duckdb",
+ "geo",
+ "geo-types",
+ "geozero",
+ "parquet",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "bevy_overture_maps_app"
+version = "0.1.0"
+dependencies = [
+ "arrow",
+ "bevy",
+ "bevy_overture_maps",
+ "duckdb",
+ "geo",
+ "geo-types",
+ "geozero",
+ "parquet",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "bevy_pbr"

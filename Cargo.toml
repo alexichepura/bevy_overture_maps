@@ -1,5 +1,5 @@
 [package]
-name = "bevy_overture_workspace"
+name = "bevy_overture_maps"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,7 @@ codegen-units = 1
 
 [workspace]
 resolver = "2"
-members = ["bevy", "cli"]
+members = ["app", "cli"]
 
 [workspace.dependencies]
 arrow = { version = "44.0.0", features = [
@@ -28,3 +28,14 @@ parquet = "44.0.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1.28" }
+
+[dependencies]
+arrow = { workspace = true }
+bevy = { workspace = true }
+duckdb = { workspace = true }
+geo = { workspace = true }
+geozero = { workspace = true }
+geo-types = { workspace = true }
+parquet = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

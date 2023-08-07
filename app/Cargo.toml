@@ -1,5 +1,5 @@
 [package]
-name = "bevy_overture"
+name = "bevy_overture_maps_app"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,3 +13,4 @@ geo-types = { workspace = true }
 parquet = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+bevy_overture_maps = { path = ".." }

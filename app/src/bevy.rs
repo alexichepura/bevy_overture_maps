@@ -1,11 +1,12 @@
 use bevy::{pbr::DirectionalLightShadowMap, prelude::*, window::WindowResolution};
+use bevy_overture_maps::{
+    buildings_start, transportations_start, Building, Buildings, Segment, SegmentsRes,
+};
 
 use crate::{
-    building::{buildings_start, Building, Buildings},
     camera::PlayerCameraPlugin,
     ground::plane_start,
     light::{animate_light_direction, light_start_system},
-    transportation::{transportations_start, Segment, SegmentsRes},
 };
 
 pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
