@@ -1,6 +1,6 @@
 use duckdb::Connection;
 
-pub fn cache_location(lon: f64, lat: f64) {
+pub fn cache_location(lon: f64, lat: f64, name: &str) {
     let shift = 0.01;
     let lat_max = lat + shift;
     let lat_min = lat - shift;
@@ -20,7 +20,7 @@ pub fn cache_location(lon: f64, lat: f64) {
     let mut stmt = conn
         .prepare(&format!(
             "COPY (SELECT * FROM {from_segment} WHERE {where_geometry})
-            TO 'parquet/result-transportation.parquet' (FORMAT 'parquet')"
+            TO 'parquet/{lon}-{lat}-{name}-transportation.parquet' (FORMAT 'parquet')"
         ))
         .unwrap();
     let _ = stmt.query([]).unwrap();
@@ -29,7 +29,7 @@ pub fn cache_location(lon: f64, lat: f64) {
     let mut stmt = conn
         .prepare(&format!(
             "COPY (SELECT * FROM {from_building} WHERE {where_geometry})
-            TO 'parquet/result-building.parquet' (FORMAT 'parquet')"
+            TO 'parquet/{lon}-{lat}-{name}-building.parquet' (FORMAT 'parquet')"
         ))
         .unwrap();
     let _ = stmt.query([]).unwrap();

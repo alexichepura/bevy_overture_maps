@@ -29,6 +29,7 @@ struct CheckWkbArgs {
 struct LocationArgs {
     lon: String, // x
     lat: String, // y
+    name: String,
 }
 
 #[tokio::main]
@@ -51,7 +52,7 @@ async fn main() {
             println!("Location start");
             let lon = args.lon.parse::<f64>().expect("lon to be f64");
             let lat = args.lat.parse::<f64>().expect("lat to be f64");
-            cache_location(lon, lat);
+            cache_location(lon, lat, &args.name);
             println!("Location end");
         }
     }
