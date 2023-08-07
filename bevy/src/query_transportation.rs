@@ -3,10 +3,9 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::transportation::line_string_road;
-use crate::transportation::Road;
 use crate::transportation::RoadClass;
-use crate::transportation::Transportation;
+use crate::transportation::Segment;
+use crate::transportation::{line_string_road, Road};
 
 pub struct TransportationQueryParams {
     pub from_string: String,
@@ -17,7 +16,7 @@ pub struct TransportationQueryParams {
 // https://docs.overturemaps.org/reference/transportation/segment
 // https://github.com/alexichepura/overture_maps_rs/issues/1
 
-pub fn query_transportation(params: TransportationQueryParams) -> Vec<Transportation> {
+pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     let path = "./data.duckdb";
     let conn = Connection::open(&path).unwrap();
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();
@@ -55,7 +54,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Transporta
         })
         .unwrap();
     println!("{:?}", now.elapsed());
-    let mut transportations: Vec<Transportation> = vec![];
+    let mut transportations: Vec<Segment> = vec![];
     for item in query_iter {
         let item = item.unwrap();
 
@@ -83,7 +82,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Transporta
                             line_string_road(line_string, params.k, params.translate);
                         let p: Road = serde_json::from_str(road).expect("road");
                         let road_class: RoadClass = RoadClass::from_string(&p.class);
-                        let transportation = Transportation {
+                        let transportation = Segment {
                             translate,
                             line,
                             k: params.k,

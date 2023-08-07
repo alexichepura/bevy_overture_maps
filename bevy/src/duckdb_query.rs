@@ -16,7 +16,7 @@ pub struct BuildingsQueryParams {
     pub translate: [f64; 2],
 }
 
-pub fn duckdb_query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
+pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     let path = "./data.duckdb";
     let conn = Connection::open(&path).unwrap();
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();

@@ -5,10 +5,10 @@ use crate::{
     camera::PlayerCameraPlugin,
     ground::plane_start,
     light::{animate_light_direction, light_start_system},
-    transportation::{transportations_start, BevyTransportations, Transportation},
+    transportation::{transportations_start, Segment, SegmentsRes},
 };
 
-pub fn init_bevy(buildings: Vec<Building>, transportations: Vec<Transportation>) {
+pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
     let mut app = App::new();
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -31,7 +31,7 @@ pub fn init_bevy(buildings: Vec<Building>, transportations: Vec<Transportation>)
     .insert_resource(Msaa::Sample4)
     .insert_resource(DirectionalLightShadowMap::default())
     .insert_resource(Buildings { buildings })
-    .insert_resource(BevyTransportations { transportations })
+    .insert_resource(SegmentsRes { segments })
     .add_systems(
         Startup,
         (
