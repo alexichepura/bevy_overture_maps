@@ -143,11 +143,11 @@ pub fn transportations_start(
 impl From<&RoadClass> for Color {
     fn from(value: &RoadClass) -> Self {
         match value {
-            RoadClass::Motorway => Color::FUCHSIA,
-            RoadClass::Primary => Color::BEIGE,
+            RoadClass::Motorway => Color::DARK_GRAY,
+            RoadClass::Primary => Color::GRAY,
             RoadClass::Secondary => Color::YELLOW,
             RoadClass::Tertiary => Color::ANTIQUE_WHITE,
-            RoadClass::Residential => Color::GRAY,
+            RoadClass::Residential => Color::BEIGE,
             RoadClass::LivingStreet => Color::SALMON,
             RoadClass::Trunk => Color::INDIGO,
             RoadClass::Unclassified => Color::WHITE,
