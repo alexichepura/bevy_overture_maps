@@ -16,12 +16,14 @@ pub fn cache_location(lon: f64, lat: f64, name: &str) {
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
 
+    let lonlatname = format!("{lon}_{lat}_{name}");
+
     let from_segment =
         "read_parquet('../overture/theme=transportation/type=segment/*')".to_string();
     let mut stmt = conn
         .prepare(&format!(
             "COPY (SELECT * FROM {from_segment} WHERE {where_geometry})
-            TO 'parquet/{lon}-{lat}-{name}-transportation.parquet' (FORMAT 'parquet')"
+            TO 'parquet/{lonlatname}_transportation.parquet' (FORMAT 'parquet')"
         ))
         .unwrap();
     let _ = stmt.query([]).unwrap();
@@ -30,7 +32,7 @@ pub fn cache_location(lon: f64, lat: f64, name: &str) {
     let mut stmt = conn
         .prepare(&format!(
             "COPY (SELECT * FROM {from_building} WHERE {where_geometry})
-            TO 'parquet/{lon}-{lat}-{name}-building.parquet' (FORMAT 'parquet')"
+            TO 'parquet/{lonlatname}_building.parquet' (FORMAT 'parquet')"
         ))
         .unwrap();
     let _ = stmt.query([]).unwrap();

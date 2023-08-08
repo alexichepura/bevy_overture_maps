@@ -75,7 +75,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
                     if let Some(road) = &item.road {
-                        // dbg!(&road);
+                        dbg!(&road);
                         // dbg!(&item.level);
                         let (translate, line) =
                             line_string_road(line_string, params.k, params.translate);

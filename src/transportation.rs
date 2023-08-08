@@ -140,14 +140,63 @@ pub fn transportations_start(
     }
 }
 
+impl From<&RoadClass> for Color {
+    fn from(value: &RoadClass) -> Self {
+        match value {
+            RoadClass::Motorway => Color::FUCHSIA,
+            RoadClass::Primary => Color::BEIGE,
+            RoadClass::Secondary => Color::YELLOW,
+            RoadClass::Tertiary => Color::ANTIQUE_WHITE,
+            RoadClass::Residential => Color::GRAY,
+            RoadClass::LivingStreet => Color::SALMON,
+            RoadClass::Trunk => Color::INDIGO,
+            RoadClass::Unclassified => Color::WHITE,
+            RoadClass::ParkingAisle => Color::AZURE,
+            RoadClass::Driveway => Color::OLIVE,
+            RoadClass::Pedestrian => Color::CRIMSON,
+            RoadClass::Footway => Color::ORANGE_RED,
+            RoadClass::Steps => Color::SILVER,
+            RoadClass::Track => Color::BLUE,
+            RoadClass::Cycleway => Color::GREEN,
+            RoadClass::Bridleway => Color::DARK_GREEN,
+            RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
+        }
+    }
+}
+
+type RoadWidth = f32;
+impl From<&RoadClass> for RoadWidth {
+    fn from(value: &RoadClass) -> RoadWidth {
+        match value {
+            RoadClass::Motorway => 12.,
+            RoadClass::Primary => 10.,
+            RoadClass::Secondary => 8.,
+            RoadClass::Tertiary => 6.,
+            RoadClass::Residential => 5.5,
+            RoadClass::LivingStreet => 5.,
+            RoadClass::Trunk => 4.5,
+            RoadClass::Unclassified => 4.,
+            RoadClass::ParkingAisle => 3.5,
+            RoadClass::Driveway => 3.,
+            RoadClass::Pedestrian => 2.5,
+            RoadClass::Footway => 1.5,
+            RoadClass::Steps => 1.4,
+            RoadClass::Track => 1.3,
+            RoadClass::Cycleway => 1.2,
+            RoadClass::Bridleway => 1.1,
+            RoadClass::Unknown => 1.,
+        }
+    }
+}
+
 pub fn spawn_transportation(
     cmd: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     transportation: &Segment,
 ) {
-    let segment = RoadSegment::new(&transportation.line);
-
+    let width = RoadWidth::from(&transportation.road_class);
+    let segment = RoadSegment::new(&transportation.line, width);
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_POSITION,
@@ -169,25 +218,7 @@ pub fn spawn_transportation(
         transportation.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
-    let color: Color = match transportation.road_class {
-        RoadClass::Motorway => Color::FUCHSIA,
-        RoadClass::Primary => Color::BEIGE,
-        RoadClass::Secondary => Color::YELLOW,
-        RoadClass::Tertiary => Color::ANTIQUE_WHITE,
-        RoadClass::Residential => Color::GRAY,
-        RoadClass::LivingStreet => Color::SALMON,
-        RoadClass::Trunk => Color::ORANGE_RED,
-        RoadClass::Unclassified => Color::WHITE,
-        RoadClass::ParkingAisle => Color::AZURE,
-        RoadClass::Driveway => Color::OLIVE,
-        RoadClass::Pedestrian => Color::CRIMSON,
-        RoadClass::Footway => Color::INDIGO,
-        RoadClass::Steps => Color::SILVER,
-        RoadClass::Track => Color::BLUE,
-        RoadClass::Cycleway => Color::GREEN,
-        RoadClass::Bridleway => Color::DARK_GREEN,
-        RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
-    };
+    let color = Color::from(&transportation.road_class);
     let material = StandardMaterial {
         base_color: color,
         depth_bias: transportation.road_class.depth_bias() * 100.,
@@ -224,8 +255,7 @@ impl RoadSegment {
             uvs: vec![],
         }
     }
-    pub fn new(line: &Vec<[f64; 2]>) -> Self {
-        let width: f32 = 8.;
+    pub fn new(line: &Vec<[f64; 2]>, width: f32) -> Self {
         let half_width: f32 = width / 2.;
         // let mut road_segment = RoadSegment::empty();
         let mut segm = Self::empty();
