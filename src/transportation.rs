@@ -10,6 +10,7 @@ pub struct Road {
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub enum RoadClass {
+    // highway=motorway > trunk > primary > secondary > ... > living streets > ... > footway
     Motorway,     // - motorway
     Primary,      // - primary
     Secondary,    // - secondary
@@ -29,6 +30,27 @@ pub enum RoadClass {
     Unknown,      // - unknown
 }
 impl RoadClass {
+    pub fn depth_bias(&self) -> f32 {
+        match self {
+            RoadClass::Motorway => 16.,
+            RoadClass::Primary => 15.,
+            RoadClass::Secondary => 14.,
+            RoadClass::Tertiary => 13.,
+            RoadClass::Residential => 12.,
+            RoadClass::LivingStreet => 11.,
+            RoadClass::Trunk => 10.,
+            RoadClass::Unclassified => 9.,
+            RoadClass::ParkingAisle => 8.,
+            RoadClass::Driveway => 7.,
+            RoadClass::Pedestrian => 6.,
+            RoadClass::Footway => 5.,
+            RoadClass::Steps => 4.,
+            RoadClass::Track => 3.,
+            RoadClass::Cycleway => 2.,
+            RoadClass::Bridleway => 1.,
+            RoadClass::Unknown => 0.1,
+        }
+    }
     pub fn from_string(s: &String) -> RoadClass {
         match s.as_str() {
             "motorway" => RoadClass::Motorway,
@@ -166,9 +188,16 @@ pub fn spawn_transportation(
         RoadClass::Bridleway => Color::DARK_GREEN,
         RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
     };
+    let material = StandardMaterial {
+        base_color: color,
+        depth_bias: transportation.road_class.depth_bias() * 100.,
+        reflectance: 0.5,
+        perceptual_roughness: 0.7,
+        ..default()
+    };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(color.into()),
+        material: materials.add(material),
         transform,
         ..Default::default()
     },));

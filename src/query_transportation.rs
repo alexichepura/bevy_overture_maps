@@ -33,7 +33,8 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
             "SELECT
                 id,
                 ST_GeomFromWkb(geometry) AS geometry,
-                road
+                road,
+                level
                 FROM {from} {limit}"
         ))
         .unwrap();
@@ -42,7 +43,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         // id: String,
         geom: Vec<u8>,
         road: Option<String>,
-        // level: Option<u32>,
+        level: Option<u32>,
         // connectors: Option<String>,
     }
 
@@ -53,7 +54,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
                 // id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
-                // level: row.get(3)?,
+                level: row.get(3)?,
                 // connectors: row.get(2)?,
             })
         })
@@ -62,16 +63,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     let mut segments: Vec<Segment> = vec![];
     for item in query_iter {
         let item = item.unwrap();
-
-        // if let Some(level) = &item.level {
-        //     println!("- item.level: {:?}", level);
-        // }
-
         let raw = item.geom;
-        // println!(
-        //     "statement for transportation - item geom: {raw:?}:l={}",
-        //     raw.len()
-        // );
         // MAGIC TO GET ARRAY THAT WORKS, COMPARED TO BINARY FROM PARQUET DIRECTLY
         // 0, 1, 104, 0, 0, 0, 0, 0, 1
         let raw = &raw[9..];
@@ -83,10 +75,12 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
                     if let Some(road) = &item.road {
+                        dbg!(&road);
+                        dbg!(&item.level);
                         let (translate, line) =
                             line_string_road(line_string, params.k, params.translate);
-                        let p: Road = serde_json::from_str(road).expect("road");
-                        let road_class: RoadClass = RoadClass::from_string(&p.class);
+                        let road_parsed: Road = serde_json::from_str(road).expect("road");
+                        let road_class: RoadClass = RoadClass::from_string(&road_parsed.class);
                         let segment = Segment {
                             translate,
                             line,
@@ -94,17 +88,10 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
                             road_class,
                         };
                         segments.push(segment);
-                        // dbg!(line_string);
                     }
                 }
-                Geometry::Polygon(polygon) => {
-                    dbg!(polygon);
-                    // let bevy_building =
-                    //     polygon_building(polygon, base_k, base_pos, query_item.height);
-                    // bevy_buildings.push(bevy_building);
-                }
-                not_polygon => {
-                    dbg!(&not_polygon);
+                not_line_string => {
+                    dbg!(&not_line_string);
                 }
             },
             Err(e) => {

@@ -25,6 +25,7 @@ fn main() {
 
     let bevy_transportation = query_transportation(TransportationQueryParams {
         from_string: format!("read_parquet('parquet/{lonlatname}-transportation.parquet')"),
+        limit: None,
         k,
         translate,
     });
