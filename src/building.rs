@@ -1,11 +1,92 @@
 use bevy::{prelude::*, render::mesh::*};
 use geo::algorithm::TriangulateEarcut;
 use geo_types::Polygon;
+use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 
+// https://docs.overturemaps.org/reference/buildings/building
+// ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+pub enum BuildingClass {
+    // #[serde(rename = "residential")]
+    Residential,
+    // #[serde(rename = "outbuilding")]
+    Outbuilding,
+    // #[serde(rename = "agricultural")]
+    Agricultural,
+    // #[serde(rename = "commercial")]
+    Commercial,
+    // #[serde(rename = "industrial")]
+    Industrial,
+    // #[serde(rename = "education")]
+    Education,
+    // #[serde(rename = "service")]
+    Service,
+    // #[serde(rename = "religious")]
+    Religious,
+    // #[serde(rename = "civic")]
+    Civic,
+    // #[serde(rename = "transportation")]
+    Transportation,
+    // #[serde(rename = "medical")]
+    Medical,
+    // #[serde(rename = "entertainment")]
+    Entertainment,
+    // #[serde(rename = "military")]
+    Military,
+}
+impl BuildingClass {
+    pub fn from_string(s: &String) -> BuildingClass {
+        match s.as_str() {
+            "residential" => BuildingClass::Residential,
+            "outbuilding" => BuildingClass::Outbuilding,
+            "agricultural" => BuildingClass::Agricultural,
+            "commercial" => BuildingClass::Commercial,
+            "industrial" => BuildingClass::Industrial,
+            "education" => BuildingClass::Education,
+            "service" => BuildingClass::Service,
+            "religious" => BuildingClass::Religious,
+            "civic" => BuildingClass::Civic,
+            "transportation" => BuildingClass::Transportation,
+            "medical" => BuildingClass::Medical,
+            "entertainment" => BuildingClass::Entertainment,
+            "military" => BuildingClass::Military,
+            _ => BuildingClass::Residential,
+        }
+    }
+}
+
 #[derive(Component, Debug)]
 pub struct Building {
+    pub class: Option<BuildingClass>,
+    pub translate: [f64; 2],
+    pub height: Option<f64>,
+    pub num_floors: Option<i32>,
+    pub line: Vec<[f64; 2]>,
+    pub k: f64,
+    pub vertices: Vec<[f64; 3]>,
+    pub triangle_indices: Vec<u32>,
+}
+
+impl Building {
+    pub fn from_props(props: BuildingGeometryProps, class: Option<BuildingClass>) -> Self {
+        Building {
+            class,
+            translate: props.translate,
+            height: props.height,
+            num_floors: props.num_floors,
+            line: props.line,
+            k: props.k,
+            vertices: props.vertices,
+            triangle_indices: props.triangle_indices,
+        }
+    }
+}
+#[derive(Debug)]
+pub struct BuildingGeometryProps {
     pub translate: [f64; 2],
     pub height: Option<f64>,
     pub num_floors: Option<i32>,
@@ -44,7 +125,7 @@ pub fn polygon_building(
     center: [f64; 2],
     height: Option<f64>,
     num_floors: Option<i32>,
-) -> Building {
+) -> BuildingGeometryProps {
     let exterior = polygon.exterior();
     let c1 = exterior
         .coords()
@@ -68,7 +149,7 @@ pub fn polygon_building(
     // }
 
     let triangles = polygon.earcut_triangles_raw();
-    Building {
+    BuildingGeometryProps {
         translate,
         height,
         num_floors,
@@ -101,6 +182,26 @@ pub fn buildings_start(
 ) {
     for b in buildings_res.buildings.iter() {
         spawn_building(&mut cmd, &mut meshes, &mut materials, b);
+    }
+}
+
+impl From<&BuildingClass> for Color {
+    fn from(building_class: &BuildingClass) -> Self {
+        match building_class {
+            BuildingClass::Residential => Color::SALMON,
+            BuildingClass::Outbuilding => Color::GRAY,
+            BuildingClass::Agricultural => Color::GREEN,
+            BuildingClass::Commercial => Color::GOLD,
+            BuildingClass::Industrial => Color::SILVER,
+            BuildingClass::Education => Color::AZURE,
+            BuildingClass::Service => Color::BISQUE,
+            BuildingClass::Religious => Color::AQUAMARINE,
+            BuildingClass::Civic => Color::ALICE_BLUE,
+            BuildingClass::Transportation => Color::PURPLE,
+            BuildingClass::Medical => Color::ORANGE_RED,
+            BuildingClass::Entertainment => Color::AZURE,
+            BuildingClass::Military => Color::NAVY,
+        }
     }
 }
 
@@ -165,9 +266,13 @@ pub fn spawn_building(
         building.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
+    let color = match &building.class {
+        Some(c) => Color::from(c),
+        None => Color::rgb(0.5, 0.5, 0.3),
+    };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(Color::rgb(0.5, 0.5, 0.3).into()),
+        material: materials.add(color.into()),
         transform,
         ..Default::default()
     },));

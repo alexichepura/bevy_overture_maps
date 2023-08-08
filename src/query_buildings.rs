@@ -4,6 +4,7 @@ use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
 use crate::building::{polygon_building, Building};
+use crate::BuildingClass;
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
@@ -64,8 +65,8 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
         // names: String,
         // bbox: String,
         geom: Vec<u8>,
-        numFloors: Option<i32>,
-        class: Option<String>,
+        num_floors: Option<i32>,
+        class: Option<String>, // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
     }
     let query_iter = stmt
         .query_map([], |row| {
@@ -75,7 +76,7 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
                 // names: row.get(2)?,
                 // bbox: row.get(3)?,
                 geom: row.get(3)?,
-                numFloors: row.get(4)?,
+                num_floors: row.get(4)?,
                 class: row.get(5)?,
             })
         })
@@ -100,8 +101,19 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
                         params.k,
                         params.center,
                         query_item.height,
-                        query_item.numFloors,
+                        query_item.num_floors,
                     );
+                    let building_class: Option<BuildingClass> = match query_item.class {
+                        Some(c) => {
+                            println!("building_class: {c}");
+                            // let building_class: BuildingClass =
+                            // serde_json::from_str(&c).expect("building class");
+                            let building_class: BuildingClass = BuildingClass::from_string(&c);
+                            Some(building_class)
+                        }
+                        None => None,
+                    };
+                    let building = Building::from_props(building, building_class);
                     buildings.push(building);
                 }
                 not_polygon => {
