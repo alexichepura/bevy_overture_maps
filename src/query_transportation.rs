@@ -10,6 +10,7 @@ use crate::transportation::{line_string_road, Road};
 pub struct TransportationQueryParams {
     pub from_string: String,
     pub k: f64,
+    pub limit: Option<u32>,
     pub translate: [f64; 2],
 }
 
@@ -23,17 +24,21 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
     let from = params.from_string;
+    let limit: String = match params.limit {
+        Some(l) => format!("LIMIT {}", l),
+        None => String::from(""),
+    };
     let mut stmt = conn
         .prepare(&format!(
             "SELECT
                 id,
                 ST_GeomFromWkb(geometry) AS geometry,
                 road
-                FROM {from}"
+                FROM {from} {limit}"
         ))
         .unwrap();
     #[derive(Debug)]
-    struct DbTransportation {
+    struct DbSegment {
         // id: String,
         geom: Vec<u8>,
         road: Option<String>,
@@ -44,7 +49,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     let now = std::time::Instant::now();
     let query_iter = stmt
         .query_map([], |row| {
-            Ok(DbTransportation {
+            Ok(DbSegment {
                 // id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
@@ -54,7 +59,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         })
         .unwrap();
     println!("{:?}", now.elapsed());
-    let mut transportations: Vec<Segment> = vec![];
+    let mut segments: Vec<Segment> = vec![];
     for item in query_iter {
         let item = item.unwrap();
 
@@ -82,13 +87,13 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
                             line_string_road(line_string, params.k, params.translate);
                         let p: Road = serde_json::from_str(road).expect("road");
                         let road_class: RoadClass = RoadClass::from_string(&p.class);
-                        let transportation = Segment {
+                        let segment = Segment {
                             translate,
                             line,
                             k: params.k,
                             road_class,
                         };
-                        transportations.push(transportation);
+                        segments.push(segment);
                         // dbg!(line_string);
                     }
                 }
@@ -108,5 +113,5 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         }
     }
 
-    transportations
+    segments
 }

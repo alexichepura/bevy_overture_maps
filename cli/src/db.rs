@@ -16,7 +16,8 @@ pub fn cache_location(lon: f64, lat: f64, name: &str) {
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
 
-    let from_segment = "read_parquet('../overture/type=segment/*')".to_string();
+    let from_segment =
+        "read_parquet('../overture/theme=transportation/type=segment/*')".to_string();
     let mut stmt = conn
         .prepare(&format!(
             "COPY (SELECT * FROM {from_segment} WHERE {where_geometry})
