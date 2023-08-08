@@ -43,7 +43,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         // id: String,
         geom: Vec<u8>,
         road: Option<String>,
-        level: Option<u32>,
+        // level: Option<u32>,
         // connectors: Option<String>,
     }
 
@@ -54,7 +54,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
                 // id: row.get(0)?,
                 geom: row.get(1)?,
                 road: row.get(2)?,
-                level: row.get(3)?,
+                // level: row.get(3)?,
                 // connectors: row.get(2)?,
             })
         })
