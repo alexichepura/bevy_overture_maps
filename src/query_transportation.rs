@@ -75,8 +75,8 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
                     if let Some(road) = &item.road {
-                        dbg!(&road);
-                        dbg!(&item.level);
+                        // dbg!(&road);
+                        // dbg!(&item.level);
                         let (translate, line) =
                             line_string_road(line_string, params.k, params.translate);
                         let road_parsed: Road = serde_json::from_str(road).expect("road");
