@@ -45,11 +45,12 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     let mut stmt = conn
         .prepare(
             &format!(
-                "SELECT
-                id,
+                "SELECT id,
                 height,
                 JSON(names) as names,
-                ST_GeomFromWkb(geometry) AS geometry
+                ST_GeomFromWkb(geometry) AS geometry,
+                numFloors,
+                class,
             FROM {from} {limit}"
             ),
             // WHERE
@@ -63,6 +64,8 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
         // names: String,
         // bbox: String,
         geom: Vec<u8>,
+        numFloors: Option<i32>,
+        class: Option<String>,
     }
     let query_iter = stmt
         .query_map([], |row| {
@@ -72,6 +75,8 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
                 // names: row.get(2)?,
                 // bbox: row.get(3)?,
                 geom: row.get(3)?,
+                numFloors: row.get(4)?,
+                class: row.get(5)?,
             })
         })
         .unwrap();
@@ -79,7 +84,7 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     let mut buildings: Vec<Building> = vec![];
     for query_item in query_iter {
         let query_item = query_item.unwrap();
-        // println!("{:?}", &query_item);
+        println!("{:?}", &query_item);
         let raw = query_item.geom;
         // MAGIC TO GET ARRAY THAT WORKS, COMPARED TO BINARY FROM PARQUET DIRECTLY
         let raw = &raw[21..]; // remove 0, 2, 96, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0, 0,
@@ -90,8 +95,13 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
         match g {
             Ok(g) => match g {
                 Geometry::Polygon(polygon) => {
-                    let building =
-                        polygon_building(polygon, params.k, params.center, query_item.height);
+                    let building = polygon_building(
+                        polygon,
+                        params.k,
+                        params.center,
+                        query_item.height,
+                        query_item.numFloors,
+                    );
                     buildings.push(building);
                 }
                 not_polygon => {

@@ -8,6 +8,7 @@ use std::ops::Sub;
 pub struct Building {
     pub translate: [f64; 2],
     pub height: Option<f64>,
+    pub num_floors: Option<i32>,
     pub line: Vec<[f64; 2]>,
     pub k: f64,
     pub vertices: Vec<[f64; 3]>,
@@ -42,6 +43,7 @@ pub fn polygon_building(
     k: f64,
     center: [f64; 2],
     height: Option<f64>,
+    num_floors: Option<i32>,
 ) -> Building {
     let exterior = polygon.exterior();
     let c1 = exterior
@@ -69,6 +71,7 @@ pub fn polygon_building(
     Building {
         translate,
         height,
+        num_floors,
         line,
         k,
         vertices: triangles
@@ -127,7 +130,10 @@ pub fn spawn_building(
 ) {
     let height: f32 = match building.height {
         Some(h) => h as f32,
-        None => 10.,
+        None => match building.num_floors {
+            Some(floors) => floors as f32 * 3.,
+            None => 10.,
+        },
     };
 
     let wall = Wall::new(&building.line, height);
