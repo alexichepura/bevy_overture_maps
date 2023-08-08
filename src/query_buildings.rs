@@ -13,7 +13,7 @@ pub struct BuildingsQueryParams {
     pub from_string: String,
     pub limit: Option<u32>,
     pub k: f64,
-    pub translate: [f64; 2],
+    pub center: [f64; 2],
 }
 
 pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
@@ -91,7 +91,7 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
             Ok(g) => match g {
                 Geometry::Polygon(polygon) => {
                     let building =
-                        polygon_building(polygon, params.k, params.translate, query_item.height);
+                        polygon_building(polygon, params.k, params.center, query_item.height);
                     buildings.push(building);
                 }
                 not_polygon => {

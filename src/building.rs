@@ -37,20 +37,25 @@ pub struct Buildings {
 //     (k, first_point_position)
 // }
 
-pub fn polygon_building(polygon: Polygon, k: f64, base: [f64; 2], height: Option<f64>) -> Building {
+pub fn polygon_building(
+    polygon: Polygon,
+    k: f64,
+    center: [f64; 2],
+    height: Option<f64>,
+) -> Building {
     let exterior = polygon.exterior();
     let c1 = exterior
         .coords()
         .nth(0)
         .expect("To take exterior:0 coordinate");
-    let translate: [f64; 2] = [c1.x * k - base[0], c1.y * k - base[1]];
+    let translate: [f64; 2] = [c1.x * k - center[0], -c1.y * k - center[1]]; // Yto-Z
 
     let line: Vec<[f64; 2]> = exterior
         .coords()
         .map(|c| {
             [
-                c.x * k - base[0] - translate[0],
-                c.y * k - base[1] - translate[1],
+                c.x * k - center[0] - translate[0],
+                -c.y * k - center[1] - translate[1], // Yto-Z
             ]
         })
         .collect();
@@ -71,9 +76,9 @@ pub fn polygon_building(polygon: Polygon, k: f64, base: [f64; 2], height: Option
             .chunks(2)
             .map(|i| {
                 [
-                    i[0] * k - base[0] - translate[0],
+                    i[0] * k - center[0] - translate[0],
                     0.,
-                    i[1] * k - base[1] - translate[1],
+                    -i[1] * k - center[1] - translate[1], // Yto-Z
                 ]
             })
             .collect(),
@@ -185,8 +190,8 @@ pub fn spawn_building(
     let uvs: Vec<[f32; 2]> = vertices.clone().iter().map(|p| [p[0], p[2]]).collect();
     roof.insert_attribute(Mesh::ATTRIBUTE_UV_0, VertexAttributeValues::from(uvs));
     let bs = building.triangle_indices.clone();
-    let rev: Vec<u32> = bs.into_iter().rev().collect();
-    roof.set_indices(Some(Indices::U32(rev)));
+    // let rev: Vec<u32> = bs.into_iter().rev().collect();
+    roof.set_indices(Some(Indices::U32(bs)));
 
     let translation = transform.translation + Vec3::new(0., height, 0.);
     let transform: Transform = Transform::from_translation(translation);
@@ -237,16 +242,15 @@ impl Wall {
             let ix2: u32 = i as u32 * 4;
             if last {
             } else {
-                let (i1, i2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
+                let (i1, i2) = ([ix2, ix2 + 2, ix2 + 1], [ix2 + 2, ix2 + 3, ix2 + 1]); // Yto-Z
                 wall.indices.extend(i1);
                 wall.indices.extend(i2);
                 let point_next = wall.points[i + 1];
                 let dir: Vec3 = (point_next - *p).normalize();
                 // println!("{:?}", &dir);
-                let left_norm = Quat::from_rotation_y(FRAC_PI_2).mul_vec3(dir);
-                wall.norm.push(left_norm);
+                let norm = Quat::from_rotation_y(-FRAC_PI_2).mul_vec3(dir); // Yto-Z
+                wall.norm.push(norm);
                 let i_next: usize = if last { 0 } else { i + 1 };
-                let normal = wall.norm[i];
                 let point: Vec3 = *p;
                 let point_next: Vec3 = wall.points[i_next];
                 wall.vertices.push((point).into());
@@ -259,10 +263,12 @@ impl Wall {
                 wall.uvs.push([len / material_lengh, 1.]);
                 wall.uvs.push([len / material_lengh, 0.]);
                 wall.uvs.push([len / material_lengh, 1.]);
-                wall.normals.push(normal.to_array());
-                wall.normals.push(normal.to_array());
-                wall.normals.push(normal.to_array());
-                wall.normals.push(normal.to_array());
+
+                let norm_arr = norm.to_array();
+                wall.normals.push(norm_arr);
+                wall.normals.push(norm_arr);
+                wall.normals.push(norm_arr);
+                wall.normals.push(norm_arr);
                 len += diff;
             }
         }

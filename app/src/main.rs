@@ -21,7 +21,7 @@ fn main() {
     println!("{lonlatname}");
 
     let k = geodesic_to_coord(Coord { x: lon, y: lat });
-    let translate: [f64; 2] = [lon * k, lat * k];
+    let center_xz: [f64; 2] = [lon * k, -lat * k]; // Yto-Z
 
     let from_transportation =
         format!("read_parquet('parquet/{lonlatname}_transportation.parquet')");
@@ -33,14 +33,14 @@ fn main() {
         from_string: from_transportation,
         limit: None,
         k,
-        translate,
+        center: center_xz,
     });
 
     let bevy_buildings = query_buildings(BuildingsQueryParams {
         from_string: from_building,
         limit: None,
         k,
-        translate,
+        center: center_xz,
     });
     init_bevy(bevy_buildings, bevy_transportation);
 }

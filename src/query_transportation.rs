@@ -11,7 +11,7 @@ pub struct TransportationQueryParams {
     pub from_string: String,
     pub k: f64,
     pub limit: Option<u32>,
-    pub translate: [f64; 2],
+    pub center: [f64; 2],
 }
 
 // https://docs.overturemaps.org/reference/transportation/segment
@@ -78,7 +78,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
                         dbg!(&road);
                         // dbg!(&item.level);
                         let (translate, line) =
-                            line_string_road(line_string, params.k, params.translate);
+                            line_string_road(line_string, params.k, params.center);
                         let road_parsed: Road = serde_json::from_str(road).expect("road");
                         let road_class: RoadClass = RoadClass::from_string(&road_parsed.class);
                         let segment = Segment {

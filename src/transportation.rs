@@ -92,24 +92,24 @@ pub struct SegmentsRes {
 pub fn line_string_road(
     line_string: LineString,
     k: f64,
-    base: [f64; 2],
+    center: [f64; 2],
 ) -> ([f64; 2], Vec<[f64; 2]>) {
     let c1 = line_string
         .coords()
         .nth(0)
         .expect("To take exterior:0 coordinate");
-    let translate: [f64; 2] = [c1.x * k - base[0], c1.y * k - base[1]];
+    let first_point_xz: [f64; 2] = [c1.x * k - center[0], -c1.y * k - center[1]]; // Yto-Z
 
     let line: Vec<[f64; 2]> = line_string
         .coords()
         .map(|c| {
             [
-                c.x * k - base[0] - translate[0],
-                c.y * k - base[1] - translate[1],
+                c.x * k - center[0] - first_point_xz[0],
+                -c.y * k - center[1] - first_point_xz[1], // Yto-Z
             ]
         })
         .collect();
-    (translate, line)
+    (first_point_xz, line)
 }
 // pub fn line_string_base(line_string: &LineString) -> (f64, [f64; 2]) {
 //     let c1 = line_string
