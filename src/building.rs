@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 
+use crate::material::MapMaterialHandle;
+
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
 
@@ -192,10 +194,11 @@ pub fn buildings_start(
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    map_materials: Res<MapMaterialHandle>,
     buildings_res: Res<Buildings>,
 ) {
     for b in buildings_res.buildings.iter() {
-        spawn_building(&mut cmd, &mut meshes, &mut materials, b);
+        spawn_building(&mut cmd, &mut meshes, &mut materials, b, &map_materials);
     }
 }
 
@@ -242,6 +245,7 @@ pub fn spawn_building(
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
     building: &Building,
+    map_materials: &Res<MapMaterialHandle>,
 ) {
     let height: f32 = match building.height {
         Some(h) => h as f32,
@@ -315,14 +319,14 @@ pub fn spawn_building(
     let uvs: Vec<[f32; 2]> = vertices.clone().iter().map(|p| [p[0], p[2]]).collect();
     roof.insert_attribute(Mesh::ATTRIBUTE_UV_0, VertexAttributeValues::from(uvs));
     let bs = building.triangle_indices.clone();
-    // let rev: Vec<u32> = bs.into_iter().rev().collect();
     roof.set_indices(Some(Indices::U32(bs)));
 
     let translation = transform.translation + Vec3::new(0., height, 0.);
     let transform: Transform = Transform::from_translation(translation);
     cmd.spawn((PbrBundle {
         mesh: meshes.add(roof),
-        material: materials.add(Color::rgb(0.3, 0.3, 0.2).into()),
+        // material: materials.add(Color::rgb(0.3, 0.3, 0.2).into()),
+        material: map_materials.roof.clone(),
         transform,
         ..Default::default()
     },));

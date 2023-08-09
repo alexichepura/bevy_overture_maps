@@ -1,6 +1,7 @@
 use bevy::{pbr::DirectionalLightShadowMap, prelude::*, window::WindowResolution};
 use bevy_overture_maps::{
-    buildings_start, transportations_start, Building, Buildings, Segment, SegmentsRes,
+    buildings_start, transportations_start, Building, Buildings, MapMaterialHandle, Segment,
+    SegmentsRes,
 };
 
 use crate::{
@@ -29,6 +30,7 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
         }),
         PlayerCameraPlugin,
     ))
+    .init_resource::<MapMaterialHandle>()
     .insert_resource(Msaa::Sample4)
     .insert_resource(DirectionalLightShadowMap { size: 4096 })
     .insert_resource(Buildings { buildings })
