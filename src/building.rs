@@ -325,7 +325,6 @@ pub fn spawn_building(
     let transform: Transform = Transform::from_translation(translation);
     cmd.spawn((PbrBundle {
         mesh: meshes.add(roof),
-        // material: materials.add(Color::rgb(0.3, 0.3, 0.2).into()),
         material: map_materials.roof.clone(),
         transform,
         ..Default::default()
