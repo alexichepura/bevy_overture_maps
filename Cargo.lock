@@ -977,7 +977,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_overture_maps"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrow",
  "bevy",
@@ -992,7 +992,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_overture_maps_app"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "arrow",
  "bevy",
@@ -1008,7 +1008,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_overture_maps_cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "duckdb",
