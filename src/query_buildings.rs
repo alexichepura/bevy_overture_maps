@@ -23,40 +23,21 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     conn.execute_batch("INSTALL httpfs; LOAD httpfs;").unwrap();
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
-    // let mut stmt = conn
-    //     .prepare(
-    //         "SELECT
-    //             id,
-    //             ST_GeomFromWkb(geometry) AS geometry
-    //         FROM read_parquet('s3://overturemaps-us-west-2/release/2023-07-26-alpha.0/theme=buildings/type=*/*', filename=true, hive_partitioning=1)
-    //         WHERE
-    //                 bbox.minX > -122.4447744
-    //             AND bbox.maxX < -122.2477071
-    //             AND bbox.minY > 47.5621587
-    //             AND bbox.maxY < 47.7120663
-    //         LIMIT
-    //             100",
-    //     )
-    //     .unwrap();
     let from = params.from_string;
     let limit: String = match params.limit {
         Some(l) => format!("LIMIT {}", l),
         None => String::from(""),
     };
     let mut stmt = conn
-        .prepare(
-            &format!(
-                "SELECT id,
+        .prepare(&format!(
+            "SELECT id,
                 height,
                 JSON(names) as names,
                 geometry,
                 numFloors,
                 class,
             FROM {from} {limit}"
-            ),
-            // WHERE
-            //     bbox.minX > 139.69170 AND bbox.maxX < 139.70170 AND bbox.minY > 35.68951 AND bbox.maxY < 35.69951",
-        )
+        ))
         .unwrap();
     #[derive(Debug)]
     struct DbBuilding {
@@ -66,7 +47,7 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
         // bbox: String,
         geom: Vec<u8>,
         num_floors: Option<i32>,
-        class: Option<String>, // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
+        class: Option<String>,
     }
     let query_iter = stmt
         .query_map([], |row| {
