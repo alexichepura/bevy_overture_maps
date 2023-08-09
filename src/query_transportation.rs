@@ -32,7 +32,7 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         .prepare(&format!(
             "SELECT
                 id,
-                ST_GeomFromWkb(geometry) AS geometry,
+                geometry,
                 road,
                 level
                 FROM {from} {limit}"
@@ -64,18 +64,13 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     for item in query_iter {
         let item = item.unwrap();
         let raw = item.geom;
-        // MAGIC TO GET ARRAY THAT WORKS, COMPARED TO BINARY FROM PARQUET DIRECTLY
-        // 0, 1, 104, 0, 0, 0, 0, 0, 1
-        let raw = &raw[9..];
-        let prefix: [u8; 2] = [1, 2];
-        let raw = [prefix.as_slice(), &raw].concat();
         let mut rdr = std::io::Cursor::new(raw);
         let g = Geometry::from_wkb(&mut rdr, WkbDialect::Wkb);
         match g {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
                     if let Some(road) = &item.road {
-                        dbg!(&road);
+                        // dbg!(&road);
                         // dbg!(&item.level);
                         let (translate, line) =
                             line_string_road(line_string, params.k, params.center);

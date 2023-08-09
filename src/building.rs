@@ -8,7 +8,7 @@ use std::ops::Sub;
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum BuildingClass {
     // #[serde(rename = "residential")]
@@ -131,6 +131,7 @@ pub fn polygon_building(
         .coords()
         .nth(0)
         .expect("To take exterior:0 coordinate");
+
     let translate: [f64; 2] = [c1.x * k - center[0], -c1.y * k - center[1]]; // Yto-Z
 
     let line: Vec<[f64; 2]> = exterior
@@ -142,7 +143,20 @@ pub fn polygon_building(
             ]
         })
         .collect();
+
     // println!("line l:{} :{:?}", line.len(), &line);
+    // for (i, l) in line.iter().enumerate() {
+    //     if i > 0 {
+    //         let dx = l[0] - line[i - 1][0];
+    //         if dx > 1000. {
+    //             println!("{i}dx>100:{dx}:{:?}", &line);
+    //         }
+    //         let dy = l[1] - line[i - 1][1];
+    //         if dy > 1000. {
+    //             println!("{i}dy>100:{dy}:{:?}", &line);
+    //         }
+    //     }
+    // }
     // let is_last_eq_first = line.first() == line.last();
     // if !is_last_eq_first {
     //     println!("is_last_eq_first:{is_last_eq_first}-{:?}", &line);
