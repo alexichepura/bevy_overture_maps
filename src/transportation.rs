@@ -3,12 +3,15 @@ use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
+use strum_macros::EnumIter;
+
+use crate::MapMaterialHandle;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Road {
     pub class: String,
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(EnumIter, Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum RoadClass {
     // highway=motorway > trunk > primary > secondary > ... > living streets > ... > footway
     Motorway,     // - motorway
@@ -134,9 +137,10 @@ pub fn transportations_start(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     transportations_res: Res<SegmentsRes>,
+    map_materials: Res<MapMaterialHandle>,
 ) {
     for item in transportations_res.segments.iter() {
-        spawn_transportation(&mut cmd, &mut meshes, &mut materials, item);
+        spawn_transportation(&mut cmd, &mut meshes, &mut materials, item, &map_materials);
     }
 }
 
@@ -192,8 +196,9 @@ impl From<&RoadClass> for RoadWidth {
 pub fn spawn_transportation(
     cmd: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
+    _materials: &mut ResMut<Assets<StandardMaterial>>,
     transportation: &Segment,
+    map_materials: &Res<MapMaterialHandle>,
 ) {
     let width = RoadWidth::from(&transportation.road_class);
     let segment = RoadSegment::new(&transportation.line, width);
@@ -218,17 +223,23 @@ pub fn spawn_transportation(
         transportation.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
-    let color = Color::from(&transportation.road_class);
-    let material = StandardMaterial {
-        base_color: color,
-        depth_bias: transportation.road_class.depth_bias() * 100.,
-        reflectance: 0.5,
-        perceptual_roughness: 0.7,
-        ..default()
-    };
+    // let color = Color::from(&transportation.road_class);
+    // let material = StandardMaterial {
+    //     base_color: color,
+    //     depth_bias: transportation.road_class.depth_bias() * 100.,
+    //     reflectance: 0.5,
+    //     perceptual_roughness: 0.7,
+    //     ..default()
+    // };
+
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(material),
+        // material: materials.add(material),
+        material: map_materials
+            .road
+            .get(&transportation.road_class)
+            .unwrap()
+            .clone(),
         transform,
         ..Default::default()
     },));

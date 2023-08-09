@@ -4,13 +4,14 @@ use geo_types::Polygon;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
+use strum_macros::EnumIter;
 
 use crate::material::MapMaterialHandle;
 
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(EnumIter, Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum BuildingClass {
     // #[serde(rename = "residential")]
@@ -205,12 +206,12 @@ pub fn buildings_start(
 impl From<&BuildingClass> for Color {
     fn from(building_class: &BuildingClass) -> Self {
         match building_class {
-            BuildingClass::Residential => Color::SALMON,
-            BuildingClass::Outbuilding => Color::GRAY,
+            BuildingClass::Residential => Color::rgb(0.5, 0.4, 0.3),
+            BuildingClass::Outbuilding => Color::DARK_GRAY,
             BuildingClass::Agricultural => Color::GREEN,
-            BuildingClass::Commercial => Color::GOLD,
+            BuildingClass::Commercial => Color::TEAL,
             BuildingClass::Industrial => Color::SILVER,
-            BuildingClass::Education => Color::AZURE,
+            BuildingClass::Education => Color::ANTIQUE_WHITE,
             BuildingClass::Service => Color::BISQUE,
             BuildingClass::Religious => Color::AQUAMARINE,
             BuildingClass::Civic => Color::ALICE_BLUE,
@@ -243,7 +244,7 @@ pub fn _buildings_update(buildings_res: Res<Buildings>, mut gizmos: Gizmos) {
 pub fn spawn_building(
     cmd: &mut Commands,
     meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
+    _materials: &mut ResMut<Assets<StandardMaterial>>,
     building: &Building,
     map_materials: &Res<MapMaterialHandle>,
 ) {
@@ -256,16 +257,6 @@ pub fn spawn_building(
     };
 
     let wall = Wall::new(&building.line, height);
-
-    // println!(
-    //     "building - translate: {:?}, line: {}, vertices: {}, indices: {}, normals: {}",
-    //     b.translate,
-    //     b.line.len(),
-    //     wall.vertices.len(),
-    //     wall.indices.len(),
-    //     wall.normals.len(),
-    // );
-
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     mesh.insert_attribute(
         Mesh::ATTRIBUTE_POSITION,
@@ -284,13 +275,17 @@ pub fn spawn_building(
         building.translate[1] as f32,
     );
     let transform = Transform::from_translation(translate);
-    let color = match &building.class {
-        Some(c) => Color::from(c),
-        None => Color::rgb(0.5, 0.5, 0.3),
+    let handle: Handle<StandardMaterial> = match &building.class {
+        Some(c) => map_materials.walls.get(c).unwrap().clone(),
+        None => map_materials
+            .walls
+            .get(&BuildingClass::Residential)
+            .unwrap()
+            .clone(),
     };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: materials.add(color.into()),
+        material: handle,
         transform,
         ..Default::default()
     },));

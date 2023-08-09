@@ -39,3 +39,5 @@ geo-types = { workspace = true }
 parquet = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+strum = "0.25.0"
+strum_macros = "0.25.2"
