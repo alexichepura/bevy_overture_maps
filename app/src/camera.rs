@@ -41,10 +41,10 @@ pub fn camera_start_system(mut cmd: Commands) {
     dbg!("camera_start_system");
     cmd.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-10., 10., 30.).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(-50., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
             #[cfg(not(any(target_arch = "wasm32", target_os = "ios", target_os = "android")))]
             projection: Projection::from(PerspectiveProjection {
-                far: 5000.,
+                far: 1000.,
                 near: 0.01,
                 ..default()
             }),

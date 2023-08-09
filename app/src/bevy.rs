@@ -20,9 +20,9 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
     app.add_plugins((
         DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Bevy Overture".to_string(),
+                title: "Bevy Overture Maps".to_string(),
                 resolution: res,
-                canvas: Some("#bevy-overture".to_string()),
+                canvas: Some("#bevy-overture-maps".to_string()),
                 ..default()
             }),
             ..default()
@@ -30,7 +30,7 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
         PlayerCameraPlugin,
     ))
     .insert_resource(Msaa::Sample4)
-    .insert_resource(DirectionalLightShadowMap::default())
+    .insert_resource(DirectionalLightShadowMap { size: 4096 })
     .insert_resource(Buildings { buildings })
     .insert_resource(SegmentsRes { segments })
     .add_systems(
