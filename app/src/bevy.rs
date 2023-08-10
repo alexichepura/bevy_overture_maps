@@ -37,7 +37,7 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
     ))
     .init_resource::<MapMaterialHandle>()
     .insert_resource(Msaa::Sample4)
-    .insert_resource(DirectionalLightShadowMap { size: 2048 / 4 })
+    .insert_resource(DirectionalLightShadowMap { size: 2048 * 2 })
     .insert_resource(Buildings { buildings })
     .insert_resource(SegmentsRes { segments })
     .add_systems(

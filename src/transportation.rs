@@ -160,7 +160,7 @@ impl From<&RoadClass> for Color {
             RoadClass::Pedestrian => Color::CRIMSON,
             RoadClass::Footway => Color::ORANGE_RED,
             RoadClass::Steps => Color::SILVER,
-            RoadClass::Track => Color::BLUE,
+            RoadClass::Track => Color::LIME_GREEN,
             RoadClass::Cycleway => Color::GREEN,
             RoadClass::Bridleway => Color::DARK_GREEN,
             RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
