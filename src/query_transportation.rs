@@ -6,10 +6,11 @@ use geozero::wkb::WkbDialect;
 use crate::transportation::RoadClass;
 use crate::transportation::Segment;
 use crate::transportation::{line_string_road, Road};
+use crate::KxyGeodesic;
 
 pub struct TransportationQueryParams {
     pub from_string: String,
-    pub k: f64,
+    pub k: KxyGeodesic,
     pub limit: Option<u32>,
     pub center: [f64; 2],
 }

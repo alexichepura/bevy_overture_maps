@@ -5,6 +5,7 @@ use geozero::wkb::WkbDialect;
 
 use crate::building::{polygon_building, Building};
 use crate::BuildingClass;
+use crate::KxyGeodesic;
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
@@ -13,7 +14,7 @@ use crate::BuildingClass;
 pub struct BuildingsQueryParams {
     pub from_string: String,
     pub limit: Option<u32>,
-    pub k: f64,
+    pub k: KxyGeodesic,
     pub center: [f64; 2],
 }
 

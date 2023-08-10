@@ -5,7 +5,7 @@ use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 use strum_macros::EnumIter;
 
-use crate::MapMaterialHandle;
+use crate::{KxyGeodesic, MapMaterialHandle};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Road {
@@ -82,7 +82,7 @@ impl RoadClass {
 pub struct Segment {
     pub translate: [f64; 2],
     pub line: Vec<[f64; 2]>,
-    pub k: f64,
+    pub k: KxyGeodesic,
     pub road_class: RoadClass,
     // pub vertices: Vec<[f64; 3]>,
     // pub triangle_indices: Vec<u32>,
@@ -94,21 +94,21 @@ pub struct SegmentsRes {
 }
 pub fn line_string_road(
     line_string: LineString,
-    k: f64,
+    k: KxyGeodesic,
     center: [f64; 2],
 ) -> ([f64; 2], Vec<[f64; 2]>) {
     let c1 = line_string
         .coords()
         .nth(0)
         .expect("To take exterior:0 coordinate");
-    let first_point_xz: [f64; 2] = [c1.x * k - center[0], -c1.y * k - center[1]]; // Yto-Z
+    let first_point_xz: [f64; 2] = [c1.x * k[0] - center[0], -c1.y * k[1] - center[1]]; // Yto-Z
 
     let line: Vec<[f64; 2]> = line_string
         .coords()
         .map(|c| {
             [
-                c.x * k - center[0] - first_point_xz[0],
-                -c.y * k - center[1] - first_point_xz[1], // Yto-Z
+                c.x * k[0] - center[0] - first_point_xz[0],
+                -c.y * k[1] - center[1] - first_point_xz[1], // Yto-Z
             ]
         })
         .collect();

@@ -22,7 +22,7 @@ fn main() {
     println!("{lonlatname}");
 
     let k = geodesic_to_coord(Coord { x: lon, y: lat });
-    let center_xz: [f64; 2] = [lon * k, -lat * k]; // Yto-Z
+    let center_xz: [f64; 2] = [lon * k[0], -lat * k[1]]; // Yto-Z
 
     let from_transportation =
         format!("read_parquet('parquet/{lonlatname}_transportation.parquet')");

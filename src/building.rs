@@ -7,6 +7,7 @@ use std::ops::Sub;
 use strum_macros::EnumIter;
 
 use crate::material::MapMaterialHandle;
+use crate::KxyGeodesic;
 
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
@@ -69,7 +70,7 @@ pub struct Building {
     pub height: Option<f64>,
     pub num_floors: Option<i32>,
     pub line: Vec<[f64; 2]>,
-    pub k: f64,
+    pub k: KxyGeodesic,
     pub vertices: Vec<[f64; 3]>,
     pub triangle_indices: Vec<u32>,
 }
@@ -94,7 +95,7 @@ pub struct BuildingGeometryProps {
     pub height: Option<f64>,
     pub num_floors: Option<i32>,
     pub line: Vec<[f64; 2]>,
-    pub k: f64,
+    pub k: KxyGeodesic,
     pub vertices: Vec<[f64; 3]>,
     pub triangle_indices: Vec<u32>,
 }
@@ -124,7 +125,7 @@ pub struct Buildings {
 
 pub fn polygon_building(
     polygon: Polygon,
-    k: f64,
+    k: KxyGeodesic,
     center: [f64; 2],
     height: Option<f64>,
     num_floors: Option<i32>,
@@ -135,14 +136,14 @@ pub fn polygon_building(
         .nth(0)
         .expect("To take exterior:0 coordinate");
 
-    let translate: [f64; 2] = [c1.x * k - center[0], -c1.y * k - center[1]]; // Yto-Z
+    let translate: [f64; 2] = [c1.x * k[0] - center[0], -c1.y * k[1] - center[1]]; // Yto-Z
 
     let line: Vec<[f64; 2]> = exterior
         .coords()
         .map(|c| {
             [
-                c.x * k - center[0] - translate[0],
-                -c.y * k - center[1] - translate[1], // Yto-Z
+                c.x * k[0] - center[0] - translate[0],
+                -c.y * k[1] - center[1] - translate[1], // Yto-Z
             ]
         })
         .collect();
@@ -177,9 +178,9 @@ pub fn polygon_building(
             .chunks(2)
             .map(|i| {
                 [
-                    i[0] * k - center[0] - translate[0],
+                    i[0] * k[0] - center[0] - translate[0],
                     0.,
-                    -i[1] * k - center[1] - translate[1], // Yto-Z
+                    -i[1] * k[1] - center[1] - translate[1], // Yto-Z
                 ]
             })
             .collect(),
@@ -214,7 +215,7 @@ impl From<&BuildingClass> for Color {
             BuildingClass::Education => Color::ANTIQUE_WHITE,
             BuildingClass::Service => Color::BISQUE,
             BuildingClass::Religious => Color::AQUAMARINE,
-            BuildingClass::Civic => Color::ALICE_BLUE,
+            BuildingClass::Civic => Color::rgb(0.6, 0.6, 0.8),
             BuildingClass::Transportation => Color::PURPLE,
             BuildingClass::Medical => Color::ORANGE_RED,
             BuildingClass::Entertainment => Color::AZURE,
