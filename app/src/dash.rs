@@ -21,13 +21,13 @@ pub fn dash_fps_system(
 
 pub fn dash_start_system(mut cmd: Commands, asset_server: Res<AssetServer>) {
     let medium: Handle<Font> = asset_server.load("fonts/FiraMono-Medium.ttf");
-    let height = Val::Px(36.);
-    let width = Val::Px(70.);
+    let height = Val::Px(32.);
+    let width = Val::Px(80.);
     cmd.spawn(NodeBundle {
         style: Style {
             width: Val::Percent(120.),
             height: height.clone(),
-            justify_content: JustifyContent::Start,
+            justify_content: JustifyContent::End,
             align_items: AlignItems::Center,
             ..default()
         },
