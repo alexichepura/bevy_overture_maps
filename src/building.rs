@@ -206,10 +206,10 @@ pub fn buildings_start(
 impl From<&BuildingClass> for Color {
     fn from(building_class: &BuildingClass) -> Self {
         match building_class {
-            BuildingClass::Residential => Color::rgb(0.5, 0.4, 0.3),
+            BuildingClass::Residential => Color::rgb(0.5, 0.45, 0.4),
             BuildingClass::Outbuilding => Color::DARK_GRAY,
             BuildingClass::Agricultural => Color::GREEN,
-            BuildingClass::Commercial => Color::TEAL,
+            BuildingClass::Commercial => Color::rgb(0.3, 0.3, 0.4),
             BuildingClass::Industrial => Color::SILVER,
             BuildingClass::Education => Color::ANTIQUE_WHITE,
             BuildingClass::Service => Color::BISQUE,
@@ -277,15 +277,11 @@ pub fn spawn_building(
     let transform = Transform::from_translation(translate);
     let handle: Handle<StandardMaterial> = match &building.class {
         Some(c) => map_materials.walls.get(c).unwrap().clone(),
-        None => map_materials
-            .walls
-            .get(&BuildingClass::Residential)
-            .unwrap()
-            .clone(),
+        None => map_materials.unknown_building.clone(),
     };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(mesh),
-        material: handle,
+        material: handle.clone(),
         transform,
         ..Default::default()
     },));
@@ -320,7 +316,8 @@ pub fn spawn_building(
     let transform: Transform = Transform::from_translation(translation);
     cmd.spawn((PbrBundle {
         mesh: meshes.add(roof),
-        material: map_materials.roof.clone(),
+        // material: map_materials.roof.clone(),
+        material: handle,
         transform,
         ..Default::default()
     },));
