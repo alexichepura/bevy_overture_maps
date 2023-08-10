@@ -32,13 +32,12 @@ impl Plugin for PlayerCameraPlugin {
         app.insert_resource(CameraConfig::default())
             .add_systems(PostStartup, camera_start_system)
             .add_systems(Update, (grab_mouse, camera_switch_system))
-            .add_systems(PostUpdate, camera_controller_system);
+            .add_systems(PreUpdate, camera_controller_system);
     }
 }
 
 pub fn camera_start_system(mut cmd: Commands) {
     let sky_blue = Color::hex("87CEEB").unwrap();
-    dbg!("camera_start_system");
     cmd.spawn((
         Camera3dBundle {
             transform: Transform::from_xyz(-50., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
@@ -96,7 +95,7 @@ impl Default for CameraController {
     fn default() -> Self {
         Self {
             enabled: true,
-            sensitivity: 0.5,
+            sensitivity: 0.05,
             key_forward: KeyCode::W,
             key_back: KeyCode::S,
             key_left: KeyCode::A,

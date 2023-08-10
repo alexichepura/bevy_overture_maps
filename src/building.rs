@@ -314,9 +314,13 @@ pub fn spawn_building(
 
     let translation = transform.translation + Vec3::new(0., height, 0.);
     let transform: Transform = Transform::from_translation(translation);
+
+    let handle: Handle<StandardMaterial> = match &building.class {
+        Some(c) => map_materials.roofs.get(c).unwrap().clone(),
+        None => map_materials.unknown_building_roof.clone(),
+    };
     cmd.spawn((PbrBundle {
         mesh: meshes.add(roof),
-        // material: map_materials.roof.clone(),
         material: handle,
         transform,
         ..Default::default()
