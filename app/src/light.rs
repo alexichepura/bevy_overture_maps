@@ -1,4 +1,7 @@
-use bevy::{pbr::NotShadowCaster, prelude::*};
+use bevy::{
+    pbr::{CascadeShadowConfigBuilder, NotShadowCaster},
+    prelude::*,
+};
 
 pub fn light_start_system(
     mut cmd: Commands,
@@ -21,6 +24,13 @@ pub fn light_start_system(
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_8),
             ..default()
         },
+        cascade_shadow_config: CascadeShadowConfigBuilder {
+            maximum_distance: 2000.0,
+            num_cascades: 3,
+            first_cascade_far_bound: 50.,
+            ..default()
+        }
+        .into(),
         ..default()
     });
 
