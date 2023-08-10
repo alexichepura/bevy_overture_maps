@@ -40,7 +40,7 @@ pub fn camera_start_system(mut cmd: Commands) {
     let sky_blue = Color::hex("87CEEB").unwrap();
     cmd.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-50., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(0., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
             #[cfg(not(any(target_arch = "wasm32", target_os = "ios", target_os = "android")))]
             projection: Projection::from(PerspectiveProjection {
                 far: 1000.,
