@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{pbr::NotShadowCaster, prelude::*};
 
 pub fn plane_start(
     mut cmd: Commands,
@@ -6,11 +6,14 @@ pub fn plane_start(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let size = 10000.;
-    cmd.spawn((PbrBundle {
-        mesh: meshes.add(shape::Plane::from_size(size).into()),
-        material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-        ..default()
-    },));
+    cmd.spawn((
+        PbrBundle {
+            mesh: meshes.add(shape::Plane::from_size(size).into()),
+            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
+            ..default()
+        },
+        NotShadowCaster,
+    ));
 
     // cmd.spawn(PointLightBundle {
     //     point_light: PointLight {

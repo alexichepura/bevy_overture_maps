@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::mesh::*};
+use bevy::{pbr::NotShadowCaster, prelude::*, render::mesh::*};
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
@@ -232,17 +232,20 @@ pub fn spawn_transportation(
     //     ..default()
     // };
 
-    cmd.spawn((PbrBundle {
-        mesh: meshes.add(mesh),
-        // material: materials.add(material),
-        material: map_materials
-            .road
-            .get(&transportation.road_class)
-            .unwrap()
-            .clone(),
-        transform,
-        ..Default::default()
-    },));
+    cmd.spawn((
+        PbrBundle {
+            mesh: meshes.add(mesh),
+            // material: materials.add(material),
+            material: map_materials
+                .road
+                .get(&transportation.road_class)
+                .unwrap()
+                .clone(),
+            transform,
+            ..Default::default()
+        },
+        NotShadowCaster,
+    ));
 }
 
 #[derive(Component, Debug)]
