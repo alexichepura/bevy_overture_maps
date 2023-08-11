@@ -1,6 +1,8 @@
 # bevy_overture_maps
 Bevy overture is an example of integration between <https://overturemaps.org> and <https://bevyengine.org/>
 
+![v0.3 screenshot](https://github.com/alexichepura/bevy_overture_maps/assets/5582266/79513350-b7b5-4324-b955-13f5c25063f4)
+
 https://github.com/alexichepura/bevy_overture/assets/5582266/14a074e3-d520-4035-b78f-4d42ea2872ce
 
 ## Howto
