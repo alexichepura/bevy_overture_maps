@@ -5,7 +5,7 @@ pub fn plane_start(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let size = 10000.;
+    let size = 20000.;
     cmd.spawn((
         PbrBundle {
             mesh: meshes.add(shape::Plane::from_size(size).into()),
