@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 0.3.1 (2023-08-10)
+- removed segment closure
+
 ## Version 0.3.0 (2023-08-10)
 - fix to use Kxz coefficitents instead of K
 - roof colors
