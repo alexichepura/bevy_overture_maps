@@ -264,51 +264,49 @@ impl RoadSegment {
             .iter()
             .map(|pos| Vec3::new(pos[0] as f32, 0., pos[1] as f32))
             .collect::<Vec<Vec3>>();
-        let material_lengh = 1.;
+        let material_length = 1.;
         let mut len: f32 = 0.;
 
         for (i, p) in segm.points.iter().enumerate() {
             let last: bool = i + 1 == segm.points.len();
-            let ix2: u32 = i as u32 * 2;
             if last {
             } else {
-                let (i1, i2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
-                segm.indices.extend(i1);
-                segm.indices.extend(i2);
+                let ix2: u32 = i as u32 * 4;
+                let (tri_1, tri_2) = ([ix2, ix2 + 1, ix2 + 2], [ix2 + 2, ix2 + 1, ix2 + 3]);
+                segm.indices.extend(tri_1);
+                segm.indices.extend(tri_2);
                 segm.norm.push(Vec3::Y);
 
                 let i_next: usize = i + 1;
-                let normal = segm.norm[i];
                 let point: Vec3 = *p;
                 let point_next: Vec3 = segm.points[i_next];
 
                 let dir: Vec3 = (point_next - point).normalize();
                 let left_norm = Quat::from_rotation_y(FRAC_PI_2).mul_vec3(dir);
-                let right_norm = -left_norm;
-                let l1 = point + left_norm * half_width;
-                let r1 = point + right_norm * half_width;
-                let l2 = point_next + left_norm * half_width;
-                let r2 = point_next + right_norm * half_width;
+                let side = left_norm * half_width;
+                let (l1, r1) = (point + side, point - side);
+                let (l2, r2) = (point_next + side, point_next - side);
                 segm.vertices.push((l1).into());
                 segm.vertices.push((r1).into());
                 segm.vertices.push((l2).into());
                 segm.vertices.push((r2).into());
 
+                let l_uv = len / material_length;
+                segm.uvs.push([l_uv, 0.]);
+                segm.uvs.push([l_uv, 0.]);
+                segm.uvs.push([l_uv, 1.]);
+                segm.uvs.push([l_uv, 1.]);
+
+                let normal = segm.norm[i].to_array();
+                segm.normals.push(normal);
+                segm.normals.push(normal);
+                segm.normals.push(normal);
+                segm.normals.push(normal);
+
                 let diff = point_next.sub(point).length();
-                segm.uvs.push([len / material_lengh, 0.]);
-                segm.uvs.push([len / material_lengh, 1.]);
-                segm.uvs.push([len / material_lengh, 0.]);
-                segm.uvs.push([len / material_lengh, 1.]);
-                segm.normals.push(normal.to_array());
-                segm.normals.push(normal.to_array());
-                segm.normals.push(normal.to_array());
-                segm.normals.push(normal.to_array());
                 len += diff;
             }
         }
-        let points_len = segm.points.len() as u32;
-        segm.indices
-            .extend(segm.indices.clone().iter().map(|ind| ind + points_len * 2));
         segm
     }
 }

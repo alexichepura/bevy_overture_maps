@@ -28,7 +28,7 @@ pub fn light_start_system(
             ..default()
         },
         cascade_shadow_config: CascadeShadowConfigBuilder {
-            maximum_distance: 2000.,
+            maximum_distance: 2500.,
             minimum_distance: 0.2,
             num_cascades: 3,
             first_cascade_far_bound: 200.,

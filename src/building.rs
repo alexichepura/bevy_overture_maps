@@ -397,21 +397,6 @@ impl Wall {
                 len += diff;
             }
         }
-
-        wall.indices.extend(
-            wall.indices
-                .clone()
-                .iter()
-                .map(|ind| ind + points_len as u32 * 2),
-        );
-
-        // let points_len = wall.points.len() as u32;
-        // let mut indices: Vec<u32> = vec![];
-        // indices.extend(wall.indices.clone());
-        // // indices.extend(wall.indices.iter().map(|ind| ind + points_len * 2));
-        // // indices.extend(wall.indices.iter().map(|ind| ind + points_len * 4));
-        // wall.indices = indices;
-
         wall
     }
 }
