@@ -4,6 +4,8 @@ use bevy::prelude::*;
 use bevy::render::camera::Projection;
 use bevy::window::CursorGrabMode;
 
+use crate::config::SceneConfig;
+
 #[derive(Component)]
 pub struct Player;
 
@@ -36,7 +38,7 @@ impl Plugin for PlayerCameraPlugin {
     }
 }
 
-pub fn camera_start_system(mut cmd: Commands) {
+pub fn camera_start_system(mut cmd: Commands, scene_config: Res<SceneConfig>) {
     let sky_blue = Color::hex("87CEEB").unwrap();
     cmd.spawn((
         Camera3dBundle {
@@ -63,7 +65,7 @@ pub fn camera_start_system(mut cmd: Commands) {
             directional_light_color: Color::rgba(1.0, 0.95, 0.75, 1.),
             directional_light_exponent: 200.0,
             falloff: FogFalloff::from_visibility_colors(
-                20000.,
+                scene_config.size,
                 Color::rgb(0.35, 0.5, 0.66),
                 Color::rgb(0.8, 0.844, 1.0),
             ),

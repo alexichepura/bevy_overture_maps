@@ -1,11 +1,14 @@
 use bevy::{pbr::NotShadowCaster, prelude::*};
 
+use crate::config::SceneConfig;
+
 pub fn plane_start(
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    scene_config: Res<SceneConfig>,
 ) {
-    let size = 20000.;
+    let size = scene_config.size;
     cmd.spawn((
         PbrBundle {
             mesh: meshes.add(shape::Plane::from_size(size).into()),

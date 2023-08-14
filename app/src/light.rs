@@ -3,10 +3,13 @@ use bevy::{
     prelude::*,
 };
 
+use crate::config::SceneConfig;
+
 pub fn light_start_system(
     mut cmd: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    scene_config: Res<SceneConfig>,
 ) {
     cmd.insert_resource(AmbientLight {
         color: Color::rgb_u8(210, 220, 240),
@@ -44,7 +47,7 @@ pub fn light_start_system(
                 cull_mode: None,
                 ..default()
             }),
-            transform: Transform::from_scale(Vec3::splat(20000.0)),
+            transform: Transform::from_scale(Vec3::splat(scene_config.size)),
             ..default()
         },
         NotShadowCaster,

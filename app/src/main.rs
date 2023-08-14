@@ -7,6 +7,7 @@ use geo_types::Coord;
 
 mod bevy;
 mod camera;
+mod config;
 mod dash;
 mod ground;
 mod light;
