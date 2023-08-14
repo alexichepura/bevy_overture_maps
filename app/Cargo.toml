@@ -3,6 +3,10 @@ name = "bevy_overture_maps_app"
 version = "0.2.0"
 edition = "2021"
 
+[features]
+default = ["fps"]
+fps = []
+
 [dependencies]
 arrow = { workspace = true }
 bevy = { workspace = true }

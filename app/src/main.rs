@@ -8,10 +8,12 @@ use geo_types::Coord;
 mod bevy;
 mod camera;
 mod config;
-mod dash;
 mod ground;
 mod light;
 mod parquet_import;
+
+#[cfg(feature = "fps")]
+mod dash;
 
 fn main() {
     let lat = std::env::var("MAP_LAT").expect("MAP_LAT env");

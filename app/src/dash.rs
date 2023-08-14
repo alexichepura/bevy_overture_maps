@@ -3,6 +3,16 @@ use bevy::{
     prelude::*,
 };
 
+pub struct DashPlugin;
+
+impl Plugin for DashPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, (dash_start_system,))
+            .add_systems(Update, (dash_fps_system,))
+            .add_plugins((FrameTimeDiagnosticsPlugin::default(),));
+    }
+}
+
 #[derive(Component)]
 pub struct FpsText;
 

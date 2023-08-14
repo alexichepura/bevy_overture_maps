@@ -1,7 +1,4 @@
-use bevy::{
-    diagnostic::FrameTimeDiagnosticsPlugin, pbr::DirectionalLightShadowMap, prelude::*,
-    window::WindowResolution,
-};
+use bevy::{pbr::DirectionalLightShadowMap, prelude::*, window::WindowResolution};
 use bevy_overture_maps::{
     buildings_start, transportations_start, Building, Buildings, MapMaterialHandle, Segment,
     SegmentsRes,
@@ -10,7 +7,6 @@ use bevy_overture_maps::{
 use crate::{
     camera::PlayerCameraPlugin,
     config::SceneConfig,
-    dash::{dash_fps_system, dash_start_system},
     ground::plane_start,
     light::{animate_light_direction, light_start_system},
 };
@@ -34,7 +30,8 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
             ..default()
         }),
         PlayerCameraPlugin,
-        FrameTimeDiagnosticsPlugin::default(),
+        #[cfg(feature = "fps")]
+        crate::dash::DashPlugin,
     ))
     .init_resource::<MapMaterialHandle>()
     .insert_resource(Msaa::Sample4)
@@ -49,10 +46,9 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
             light_start_system,
             buildings_start,
             transportations_start,
-            dash_start_system,
         ),
     )
-    .add_systems(Update, (animate_light_direction, dash_fps_system));
+    .add_systems(Update, (animate_light_direction,));
 
     app.run();
 }
