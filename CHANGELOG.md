@@ -1,6 +1,9 @@
 # Changelog
 
-## Version 0.3.1 (2023-08-10)
+## Version 0.3.2 (2023-08-14)
+- indexes fixes for segments and walls
+
+## Version 0.3.1 (2023-08-12)
 - removed segment closure
 
 ## Version 0.3.0 (2023-08-10)

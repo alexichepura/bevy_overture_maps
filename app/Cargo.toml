@@ -1,6 +1,6 @@
 [package]
 name = "bevy_overture_maps_app"
-version = "0.2.0"
+version = "0.3.2"
 edition = "2021"
 
 [features]
