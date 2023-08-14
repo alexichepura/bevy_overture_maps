@@ -7,6 +7,6 @@ pub struct SceneConfig {
 
 impl Default for SceneConfig {
     fn default() -> Self {
-        SceneConfig { size: 10000. }
+        SceneConfig { size: 20000. }
     }
 }
