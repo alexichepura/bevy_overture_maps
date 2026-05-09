@@ -20,10 +20,8 @@ arrow = { version = "58.1.0", features = [
 bevy = { version = "0.18", features = ["jpeg"] }
 bevy_asset = "0.18"
 bevy_mesh = "0.18"
-duckdb = { git = "https://github.com/duckdb/duckdb-rs", features = [
-] } # arrow 44
-# geo = { version = "0.26.0", features = [] }
-geo = { git = "https://github.com/georust/geo" }          # Vector2DOps
+duckdb = { version = "1.10502.0", features = ["bundled"] }
+geo = { version = "0.33.1", features = [] }
 geozero = { version = "0.15.1", features = ["with-wkb"] }
 geo-types = { version = "0.7.11" }
 parquet = "58.2.0"
