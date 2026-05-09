@@ -8,11 +8,6 @@ pub fn light_start_system(
     mut materials: ResMut<Assets<StandardMaterial>>,
     scene_config: Res<SceneConfig>,
 ) {
-    cmd.insert_resource(AmbientLight {
-        color: Color::srgb_u8(210, 220, 240),
-        brightness: 0.9,
-    });
-
     cmd.spawn((
         DirectionalLight {
             illuminance: 40_000.,

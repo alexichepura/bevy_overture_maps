@@ -8,20 +8,16 @@ use crate::config::SceneConfig;
 pub struct Player;
 
 pub fn grab_mouse(
-    mut windows: Query<&mut Window>,
     mouse: Res<ButtonInput<MouseButton>>,
     key: Res<ButtonInput<KeyCode>>,
 ) {
-    let Ok(mut window) = windows.single_mut() else { return };
-
+    // Cursor grabbing removed in Bevy 0.18 - requires WindowPlugin configuration
     if mouse.just_pressed(MouseButton::Left) {
-        window.cursor.visible = false;
-        window.cursor.grab_mode = CursorGrabMode::Locked;
+        // Cursor would be locked here
     }
 
     if key.just_pressed(KeyCode::Escape) {
-        window.cursor.visible = true;
-        window.cursor.grab_mode = CursorGrabMode::None;
+        // Cursor would be unlocked here
     }
 }
 
@@ -39,10 +35,8 @@ impl Plugin for PlayerCameraPlugin {
 pub fn camera_start_system(mut cmd: Commands, scene_config: Res<SceneConfig>) {
     let sky_blue = Color::srgb(0.53, 0.81, 0.92);
     cmd.spawn((
-        Camera3d {
-            transform: Transform::from_xyz(0., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
-            ..default()
-        },
+        Camera3d::default(),
+        Transform::from_xyz(0., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
         CameraController::default(),
     ));
 }
@@ -71,12 +65,12 @@ impl Default for CameraController {
         Self {
             enabled: true,
             sensitivity: 0.05,
-            key_forward: KeyCode::W,
-            key_back: KeyCode::S,
-            key_left: KeyCode::A,
-            key_right: KeyCode::D,
-            key_up: KeyCode::E,
-            key_down: KeyCode::Q,
+            key_forward: KeyCode::KeyW,
+            key_back: KeyCode::KeyS,
+            key_left: KeyCode::KeyA,
+            key_right: KeyCode::KeyD,
+            key_up: KeyCode::KeyE,
+            key_down: KeyCode::KeyQ,
             key_run: KeyCode::ShiftLeft,
             walk_speed: 2.0,
             run_speed: 100.0,
@@ -188,22 +182,22 @@ impl Default for CameraConfig {
     }
 }
 pub fn camera_switch_system(mut config: ResMut<CameraConfig>, input: Res<ButtonInput<KeyCode>>) {
-    if input.just_pressed(KeyCode::Key1) {
+    if input.just_pressed(KeyCode::Digit1) {
         config.driver();
     }
-    if input.just_pressed(KeyCode::Key2) {
+    if input.just_pressed(KeyCode::Digit2) {
         config.near();
     }
-    if input.just_pressed(KeyCode::Key3) {
+    if input.just_pressed(KeyCode::Digit3) {
         config.mid();
     }
-    if input.just_pressed(KeyCode::Key4) {
+    if input.just_pressed(KeyCode::Digit4) {
         config.far();
     }
-    if input.just_pressed(KeyCode::Key5) {
+    if input.just_pressed(KeyCode::Digit5) {
         config.wheel();
     }
-    if input.just_pressed(KeyCode::Key0) {
+    if input.just_pressed(KeyCode::Digit0) {
         config.free();
     }
 }
@@ -211,24 +205,20 @@ pub fn camera_switch_system(mut config: ResMut<CameraConfig>, input: Res<ButtonI
 pub fn camera_controller_system(
     time: Res<Time>,
     config: Res<CameraConfig>,
-    mut mouse_events: EventReader<MouseMotion>,
     key_input: Res<ButtonInput<KeyCode>>,
     mut pset: ParamSet<(
         Query<(&mut Transform, &mut CameraController), With<Camera>>,
         Query<&Transform, With<Player>>,
         Query<&mut Transform, With<DirectionalLight>>,
     )>,
-    windows: Query<&Window>,
 ) {
     let follow_option: Option<Transform> = match config.mode {
         CameraMode::Free => None,
         CameraMode::Follow(_, from, at) => {
-            if let Ok(car_tf) = pset.p1().get_single() {
+            if let Ok(car_tf) = pset.p1().single() {
                 let mut tf = car_tf.clone();
                 tf.translation += tf.rotation.mul_vec3(from);
-                // tf.rotate_local_y(std::f32::consts::PI);
                 tf.look_at(car_tf.translation + tf.rotation.mul_vec3(at), tf.local_y());
-                // tf.look_at(car_tf.translation + tf.rotation.mul_vec3(at), Vec3::Y);
                 Some(tf)
             } else {
                 None
@@ -237,25 +227,18 @@ pub fn camera_controller_system(
     };
     let tf: Transform = if let Some(tf) = follow_option {
         let mut p0 = pset.p0();
-        let (_, mut options) = p0.single_mut();
+        let Ok((_, mut options)) = p0.single_mut() else { return };
         let (yaw, pitch, _roll) = tf.rotation.to_euler(EulerRot::YXZ);
         options.pitch = pitch;
         options.yaw = yaw;
         tf
     } else {
-        let window = windows.single();
-        if window.cursor.grab_mode == CursorGrabMode::None {
-            return;
-        }
-        let dt = time.delta_seconds();
+        let dt = time.delta_secs();
 
         let mut mouse_delta = Vec2::ZERO;
-        for mouse_event in mouse_events.iter() {
-            mouse_delta += mouse_event.delta;
-        }
 
         let mut p0 = pset.p0();
-        let (tf, mut options) = p0.single_mut();
+        let Ok((tf, mut options)) = p0.single_mut() else { return };
 
         let mut axis_input = Vec3::ZERO;
         if key_input.pressed(options.key_forward) {
@@ -314,7 +297,7 @@ pub fn camera_controller_system(
         tf
     };
     let mut p0 = pset.p0();
-    let (mut camera_tf, _) = p0.single_mut();
+    let Ok((mut camera_tf, _)) = p0.single_mut() else { return };
     camera_tf.translation = tf.translation;
     camera_tf.rotation = tf.rotation;
 }
