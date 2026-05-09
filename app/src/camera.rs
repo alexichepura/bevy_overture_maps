@@ -1,7 +1,5 @@
-use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
-use bevy::render::camera::Projection;
 use bevy::window::CursorGrabMode;
 
 use crate::config::SceneConfig;
@@ -11,10 +9,10 @@ pub struct Player;
 
 pub fn grab_mouse(
     mut windows: Query<&mut Window>,
-    mouse: Res<Input<MouseButton>>,
-    key: Res<Input<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    key: Res<ButtonInput<KeyCode>>,
 ) {
-    let mut window = windows.single_mut();
+    let Ok(mut window) = windows.single_mut() else { return };
 
     if mouse.just_pressed(MouseButton::Left) {
         window.cursor.visible = false;
@@ -39,36 +37,11 @@ impl Plugin for PlayerCameraPlugin {
 }
 
 pub fn camera_start_system(mut cmd: Commands, scene_config: Res<SceneConfig>) {
-    let sky_blue = Color::hex("87CEEB").unwrap();
+    let sky_blue = Color::srgb(0.53, 0.81, 0.92);
     cmd.spawn((
-        Camera3dBundle {
+        Camera3d {
             transform: Transform::from_xyz(0., 50., 60.).looking_at(Vec3::ZERO, Vec3::Y),
-            #[cfg(not(any(target_arch = "wasm32", target_os = "ios", target_os = "android")))]
-            projection: Projection::from(PerspectiveProjection {
-                far: 1000.,
-                near: 0.01,
-                ..default()
-            }),
-            #[cfg(any(target_arch = "wasm32", target_os = "ios", target_os = "android"))]
-            projection: Projection::from(PerspectiveProjection {
-                far: 50.,
-                near: 0.1,
-                ..default()
-            }),
-            #[cfg(any(target_os = "ios"))]
-            dither: bevy::core_pipeline::tonemapping::DebandDither::Disabled,
-            tonemapping: Tonemapping::TonyMcMapface,
             ..default()
-        },
-        FogSettings {
-            color: sky_blue, // Color::rgba(0.1, 0.2, 0.4, 1.0),
-            directional_light_color: Color::rgba(1.0, 0.95, 0.75, 1.),
-            directional_light_exponent: 200.0,
-            falloff: FogFalloff::from_visibility_colors(
-                scene_config.size,
-                Color::rgb(0.35, 0.5, 0.66),
-                Color::rgb(0.8, 0.844, 1.0),
-            ),
         },
         CameraController::default(),
     ));
@@ -214,7 +187,7 @@ impl Default for CameraConfig {
         }
     }
 }
-pub fn camera_switch_system(mut config: ResMut<CameraConfig>, input: Res<Input<KeyCode>>) {
+pub fn camera_switch_system(mut config: ResMut<CameraConfig>, input: Res<ButtonInput<KeyCode>>) {
     if input.just_pressed(KeyCode::Key1) {
         config.driver();
     }
@@ -239,7 +212,7 @@ pub fn camera_controller_system(
     time: Res<Time>,
     config: Res<CameraConfig>,
     mut mouse_events: EventReader<MouseMotion>,
-    key_input: Res<Input<KeyCode>>,
+    key_input: Res<ButtonInput<KeyCode>>,
     mut pset: ParamSet<(
         Query<(&mut Transform, &mut CameraController), With<Camera>>,
         Query<&Transform, With<Player>>,

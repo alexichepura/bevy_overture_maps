@@ -34,7 +34,7 @@ impl FromWorld for MapMaterialHandle {
     fn from_world(world: &mut World) -> Self {
         let mut standard_materials = world.resource_mut::<Assets<StandardMaterial>>();
 
-        let roof_color = Color::rgb(0.3, 0.3, 0.2);
+        let roof_color = Color::srgb(0.3, 0.3, 0.2);
         let roof = standard_materials.add(StandardMaterial {
             base_color: roof_color,
             depth_bias: 0.,
@@ -43,35 +43,21 @@ impl FromWorld for MapMaterialHandle {
             ..default()
         });
 
-        let mut roofs: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
-        for building_class in BuildingClass::iter() {
-            let color = Color::from(&building_class);
-            let color: Color = match color.as_hsla() {
-                Color::Hsla {
-                    hue,
-                    saturation,
-                    lightness,
-                    alpha,
-                } => Color::Hsla {
-                    hue,
-                    saturation,
-                    lightness: lightness * 0.5,
-                    alpha,
-                },
-                color => color,
-            };
-            let (reflectance, roughness) = building_class.to_material_params();
-            let roof_color_handle = standard_materials.add(StandardMaterial {
-                base_color: color,
-                depth_bias: 0.,
-                reflectance,
-                perceptual_roughness: roughness,
-                ..default()
-            });
-            roofs
-                .entry(building_class)
-                .or_insert_with_key(|_key| roof_color_handle);
-        }
+    let mut roofs: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
+    for building_class in BuildingClass::iter() {
+        let color = Color::from(&building_class);
+        let (reflectance, roughness) = building_class.to_material_params();
+        let roof_color_handle = standard_materials.add(StandardMaterial {
+            base_color: color,
+            depth_bias: 0.,
+            reflectance,
+            perceptual_roughness: roughness,
+            ..default()
+        });
+        roofs
+            .entry(building_class)
+            .or_insert_with_key(|_key| roof_color_handle);
+    }
 
         let mut walls: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
         for building_class in BuildingClass::iter() {
@@ -89,7 +75,7 @@ impl FromWorld for MapMaterialHandle {
                 .or_insert_with_key(|_key| wall_color_handle);
         }
 
-        let unknown_building_color = Color::GRAY;
+        let unknown_building_color = Color::srgb(0.5, 0.5, 0.5);
         let unknown_building = standard_materials.add(StandardMaterial {
             base_color: unknown_building_color,
             depth_bias: 0.,
@@ -98,27 +84,13 @@ impl FromWorld for MapMaterialHandle {
             ..default()
         });
 
-        let unknown_building_roof_color: Color = match unknown_building_color.as_hsla() {
-            Color::Hsla {
-                hue,
-                saturation,
-                lightness,
-                alpha,
-            } => Color::Hsla {
-                hue,
-                saturation,
-                lightness: lightness * 0.5,
-                alpha,
-            },
-            color => color,
-        };
-        let unknown_building_roof = standard_materials.add(StandardMaterial {
-            base_color: unknown_building_roof_color,
-            depth_bias: 0.,
-            reflectance: 0.5,
-            perceptual_roughness: 0.7,
-            ..default()
-        });
+    let unknown_building_roof = standard_materials.add(StandardMaterial {
+        base_color: unknown_building_color,
+        depth_bias: 0.,
+        reflectance: 0.5,
+        perceptual_roughness: 0.7,
+        ..default()
+    });
 
         let mut road: HashMap<RoadClass, Handle<StandardMaterial>> = HashMap::new();
         for road_class in RoadClass::iter() {

@@ -1,7 +1,4 @@
-use bevy::{
-    pbr::{CascadeShadowConfigBuilder, NotShadowCaster},
-    prelude::*,
-};
+use bevy::prelude::*;
 
 use crate::config::SceneConfig;
 
@@ -12,45 +9,32 @@ pub fn light_start_system(
     scene_config: Res<SceneConfig>,
 ) {
     cmd.insert_resource(AmbientLight {
-        color: Color::rgb_u8(210, 220, 240),
+        color: Color::srgb_u8(210, 220, 240),
         brightness: 0.9,
     });
 
-    cmd.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
+    cmd.spawn((
+        DirectionalLight {
             illuminance: 40_000.,
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform {
+        Transform {
             translation: Vec3::new(0., 0., 0.),
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_8),
             ..default()
         },
-        cascade_shadow_config: CascadeShadowConfigBuilder {
-            maximum_distance: 2500.,
-            minimum_distance: 0.2,
-            num_cascades: 3,
-            first_cascade_far_bound: 200.,
-            ..default()
-        }
-        .into(),
-        ..default()
-    });
+    ));
 
     cmd.spawn((
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::default())),
-            material: materials.add(StandardMaterial {
-                base_color: Color::hex("888888").unwrap(),
-                unlit: true,
-                cull_mode: None,
-                ..default()
-            }),
-            transform: Transform::from_scale(Vec3::splat(scene_config.size)),
+        Mesh3d(meshes.add(Cuboid::default().mesh())),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.53, 0.53, 0.53),
+            unlit: true,
+            cull_mode: None,
             ..default()
-        },
-        NotShadowCaster,
+        })),
+        Transform::from_scale(Vec3::splat(scene_config.size)),
     ));
 }
 
@@ -59,26 +43,26 @@ const K: f32 = 2.;
 pub fn animate_light_direction(
     time: Res<Time>,
     mut query: Query<&mut Transform, With<DirectionalLight>>,
-    input: Res<Input<KeyCode>>,
+    input: Res<ButtonInput<KeyCode>>,
 ) {
-    if input.pressed(KeyCode::H) {
+    if input.pressed(KeyCode::KeyH) {
         for mut transform in &mut query {
-            transform.rotate_y(time.delta_seconds() * K);
+            transform.rotate_y(time.delta_secs() * K);
         }
     }
-    if input.pressed(KeyCode::L) {
+    if input.pressed(KeyCode::KeyL) {
         for mut transform in &mut query {
-            transform.rotate_y(-time.delta_seconds() * K);
+            transform.rotate_y(-time.delta_secs() * K);
         }
     }
-    if input.pressed(KeyCode::J) {
+    if input.pressed(KeyCode::KeyJ) {
         for mut transform in &mut query {
-            transform.rotate_x(time.delta_seconds() * K);
+            transform.rotate_x(time.delta_secs() * K);
         }
     }
-    if input.pressed(KeyCode::K) {
+    if input.pressed(KeyCode::KeyK) {
         for mut transform in &mut query {
-            transform.rotate_x(-time.delta_seconds() * K);
+            transform.rotate_x(-time.delta_secs() * K);
         }
     }
 }

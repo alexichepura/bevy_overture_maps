@@ -1,4 +1,4 @@
-use bevy::{pbr::NotShadowCaster, prelude::*};
+use bevy::prelude::*;
 
 use crate::config::SceneConfig;
 
@@ -10,26 +10,7 @@ pub fn plane_start(
 ) {
     let size = scene_config.size;
     cmd.spawn((
-        PbrBundle {
-            mesh: meshes.add(shape::Plane::from_size(size).into()),
-            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-            ..default()
-        },
-        NotShadowCaster,
+        Mesh3d(meshes.add(Plane3d::default().mesh().size(size, size))),
+        MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.3))),
     ));
-
-    // cmd.spawn(PointLightBundle {
-    //     point_light: PointLight {
-    //         intensity: 1500.0,
-    //         shadows_enabled: true,
-    //         ..default()
-    //     },
-    //     transform: Transform::from_xyz(4.0, 8.0, 4.0),
-    //     ..default()
-    // });
-
-    // cmd.spawn(Camera3dBundle {
-    //     transform: Transform::from_xyz(0., 10., 20.).looking_at(Vec3::ZERO, Vec3::Y),
-    //     ..default()
-    // });
 }
