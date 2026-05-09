@@ -34,8 +34,6 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
         crate::dash::DashPlugin,
     ))
     .init_resource::<MapMaterialHandle>()
-
-
     .insert_resource(SceneConfig::default())
     .insert_resource(Buildings { buildings })
     .insert_resource(SegmentsRes { segments })

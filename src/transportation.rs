@@ -182,19 +182,13 @@ pub fn spawn_transportation(
 ) {
     let width = RoadWidth::from(&transportation.road_class);
     let segment = RoadSegment::new(&transportation.line, width);
-    let mut mesh = Mesh::new(bevy_mesh::PrimitiveTopology::TriangleList, bevy_asset::RenderAssetUsages::RENDER_WORLD);
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        segment.vertices.clone(),
+    let mut mesh = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
     );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_NORMAL,
-        segment.normals.clone(),
-    );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        segment.uvs.clone(),
-    );
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, segment.vertices.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, segment.normals.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, segment.uvs.clone());
     mesh.insert_indices(bevy_mesh::Indices::U32(segment.indices));
 
     let translate: Vec3 = Vec3::new(

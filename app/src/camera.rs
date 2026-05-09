@@ -7,10 +7,7 @@ use crate::config::SceneConfig;
 #[derive(Component)]
 pub struct Player;
 
-pub fn grab_mouse(
-    mouse: Res<ButtonInput<MouseButton>>,
-    key: Res<ButtonInput<KeyCode>>,
-) {
+pub fn grab_mouse(mouse: Res<ButtonInput<MouseButton>>, key: Res<ButtonInput<KeyCode>>) {
     // Cursor grabbing removed in Bevy 0.18 - requires WindowPlugin configuration
     if mouse.just_pressed(MouseButton::Left) {
         // Cursor would be locked here
@@ -227,7 +224,9 @@ pub fn camera_controller_system(
     };
     let tf: Transform = if let Some(tf) = follow_option {
         let mut p0 = pset.p0();
-        let Ok((_, mut options)) = p0.single_mut() else { return };
+        let Ok((_, mut options)) = p0.single_mut() else {
+            return;
+        };
         let (yaw, pitch, _roll) = tf.rotation.to_euler(EulerRot::YXZ);
         options.pitch = pitch;
         options.yaw = yaw;
@@ -238,7 +237,9 @@ pub fn camera_controller_system(
         let mut mouse_delta = Vec2::ZERO;
 
         let mut p0 = pset.p0();
-        let Ok((tf, mut options)) = p0.single_mut() else { return };
+        let Ok((tf, mut options)) = p0.single_mut() else {
+            return;
+        };
 
         let mut axis_input = Vec3::ZERO;
         if key_input.pressed(options.key_forward) {
@@ -297,7 +298,9 @@ pub fn camera_controller_system(
         tf
     };
     let mut p0 = pset.p0();
-    let Ok((mut camera_tf, _)) = p0.single_mut() else { return };
+    let Ok((mut camera_tf, _)) = p0.single_mut() else {
+        return;
+    };
     camera_tf.translation = tf.translation;
     camera_tf.rotation = tf.rotation;
 }

@@ -43,21 +43,21 @@ impl FromWorld for MapMaterialHandle {
             ..default()
         });
 
-    let mut roofs: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
-    for building_class in BuildingClass::iter() {
-        let color = Color::from(&building_class);
-        let (reflectance, roughness) = building_class.to_material_params();
-        let roof_color_handle = standard_materials.add(StandardMaterial {
-            base_color: color,
-            depth_bias: 0.,
-            reflectance,
-            perceptual_roughness: roughness,
-            ..default()
-        });
-        roofs
-            .entry(building_class)
-            .or_insert_with_key(|_key| roof_color_handle);
-    }
+        let mut roofs: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
+        for building_class in BuildingClass::iter() {
+            let color = Color::from(&building_class);
+            let (reflectance, roughness) = building_class.to_material_params();
+            let roof_color_handle = standard_materials.add(StandardMaterial {
+                base_color: color,
+                depth_bias: 0.,
+                reflectance,
+                perceptual_roughness: roughness,
+                ..default()
+            });
+            roofs
+                .entry(building_class)
+                .or_insert_with_key(|_key| roof_color_handle);
+        }
 
         let mut walls: HashMap<BuildingClass, Handle<StandardMaterial>> = HashMap::new();
         for building_class in BuildingClass::iter() {
@@ -84,13 +84,13 @@ impl FromWorld for MapMaterialHandle {
             ..default()
         });
 
-    let unknown_building_roof = standard_materials.add(StandardMaterial {
-        base_color: unknown_building_color,
-        depth_bias: 0.,
-        reflectance: 0.5,
-        perceptual_roughness: 0.7,
-        ..default()
-    });
+        let unknown_building_roof = standard_materials.add(StandardMaterial {
+            base_color: unknown_building_color,
+            depth_bias: 0.,
+            reflectance: 0.5,
+            perceptual_roughness: 0.7,
+            ..default()
+        });
 
         let mut road: HashMap<RoadClass, Handle<StandardMaterial>> = HashMap::new();
         for road_class in RoadClass::iter() {

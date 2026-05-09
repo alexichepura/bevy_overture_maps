@@ -173,17 +173,17 @@ pub fn polygon_building(
         num_floors,
         line,
         k,
-    vertices: triangles
-        .vertices
-        .iter()
-        .map(|i| {
-            [
-                (i[0] * k[0] - center[0] - translate[0]) as f32,
-                0.,
-                (-i[1] * k[1] - center[1] - translate[1]) as f32,
-            ]
-        })
-        .collect(),
+        vertices: triangles
+            .vertices
+            .iter()
+            .map(|i| {
+                [
+                    (i[0] * k[0] - center[0] - translate[0]) as f32,
+                    0.,
+                    (-i[1] * k[1] - center[1] - translate[1]) as f32,
+                ]
+            })
+            .collect(),
         triangle_indices: triangles
             .triangle_indices
             .iter()
@@ -258,15 +258,12 @@ pub fn spawn_building(
     };
 
     let wall = Wall::new(&building.line, height);
-    let mut mesh = Mesh::new(bevy_mesh::PrimitiveTopology::TriangleList, bevy_asset::RenderAssetUsages::RENDER_WORLD);
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        wall.vertices.clone(),
+    let mut mesh = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
     );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_NORMAL,
-        wall.normals.clone(),
-    );
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, wall.vertices.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, wall.normals.clone());
     mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, wall.uvs.clone());
     mesh.insert_indices(bevy_mesh::Indices::U32(wall.indices));
 
@@ -287,16 +284,16 @@ pub fn spawn_building(
     ));
 
     // ROOF
-    let mut roof = Mesh::new(bevy_mesh::PrimitiveTopology::TriangleList, bevy_asset::RenderAssetUsages::RENDER_WORLD);
+    let mut roof = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
+    );
     let vertices: Vec<[f32; 3]> = building
         .vertices
         .iter()
         .map(|v| v.map(|p| p as f32))
         .collect();
-    roof.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        vertices.clone(),
-    );
+    roof.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices.clone());
     roof.insert_attribute(
         Mesh::ATTRIBUTE_NORMAL,
         building
@@ -317,11 +314,7 @@ pub fn spawn_building(
         Some(c) => map_materials.roofs.get(c).unwrap().clone(),
         None => map_materials.unknown_building_roof.clone(),
     };
-    cmd.spawn((
-        Mesh3d(meshes.add(roof)),
-        MeshMaterial3d(handle),
-        transform,
-    ));
+    cmd.spawn((Mesh3d(meshes.add(roof)), MeshMaterial3d(handle), transform));
 }
 
 #[derive(Component, Debug)]
