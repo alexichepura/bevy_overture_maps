@@ -2,4 +2,5 @@
 data.duckdb
 data.duckdb.wal
 *.parquet
+/parquet
 .env
