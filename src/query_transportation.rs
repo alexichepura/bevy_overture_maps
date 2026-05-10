@@ -6,7 +6,7 @@ use geozero::wkb::WkbDialect;
 use crate::KxyGeodesic;
 use crate::transportation::RoadClass;
 use crate::transportation::Segment;
-use crate::transportation::{Road, line_string_road};
+use crate::transportation::line_string_road;
 
 pub struct TransportationQueryParams {
     pub from_string: String,
@@ -25,41 +25,39 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
     let from = params.from_string;
-    let limit: String = match params.limit {
+    let limit_clause = match params.limit {
         Some(l) => format!("LIMIT {}", l),
         None => String::from(""),
     };
-    let mut stmt = conn
-        .prepare(&format!(
-            "SELECT
-                id,
-                geometry,
-                road,
-                level
-                FROM {from} {limit}"
-        ))
-        .unwrap();
+    let query = if limit_clause.is_empty() {
+        format!("SELECT id, ST_AsWKB(geometry) as geometry, class FROM {from}")
+    } else {
+        format!("SELECT id, ST_AsWKB(geometry) as geometry, class FROM {from} {}", limit_clause)
+    };
+    let mut stmt = conn.prepare(&query).unwrap();
     #[derive(Debug)]
     struct DbSegment {
         // id: String,
         geom: Vec<u8>,
-        road: Option<String>,
-        // level: Option<u32>,
+        class: Option<String>,
+        // level_rules: Option<String>,
         // connectors: Option<String>,
     }
 
     let now = std::time::Instant::now();
-    let query_iter = stmt
-        .query_map([], |row| {
-            Ok(DbSegment {
-                // id: row.get(0)?,
-                geom: row.get(1)?,
-                road: row.get(2)?,
-                // level: row.get(3)?,
-                // connectors: row.get(2)?,
-            })
+    let query_iter = match stmt.query_map([], |row| {
+        Ok(DbSegment {
+            // id: row.get(0)?,
+            geom: row.get(1)?,
+            class: row.get(2)?,
         })
-        .unwrap();
+    }) {
+        Ok(iter) => iter,
+        Err(e) => {
+            eprintln!("Failed to create query map: {:?}", e);
+            return Vec::new();
+        }
+    };
     println!("{:?}", now.elapsed());
     let mut segments: Vec<Segment> = vec![];
     for item in query_iter {
@@ -70,13 +68,10 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
         match g {
             Ok(g) => match g {
                 Geometry::LineString(line_string) => {
-                    if let Some(road) = &item.road {
-                        // dbg!(&road);
-                        // dbg!(&item.level);
+                    if let Some(class) = &item.class {
                         let (translate, line) =
                             line_string_road(line_string, params.k, params.center);
-                        let road_parsed: Road = serde_json::from_str(road).expect("road");
-                        let road_class: RoadClass = RoadClass::from_string(&road_parsed.class);
+                        let road_class: RoadClass = RoadClass::from_string(class);
                         let segment = Segment {
                             translate,
                             line,
