@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.0 (2026-05-10)
+- bevy 0.18
+- Overture scheme changes
+
 ## Version 0.3.2 (2023-08-14)
 - indexes fixes for segments and walls
 
