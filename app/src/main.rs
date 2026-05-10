@@ -3,6 +3,7 @@ use bevy_overture_maps::{
     geodesic_to_coord, query_buildings, query_transportation, BuildingsQueryParams,
     TransportationQueryParams,
 };
+use dotenvy::dotenv;
 use geo_types::Coord;
 
 mod bevy;
@@ -16,6 +17,7 @@ mod parquet_import;
 mod dash;
 
 fn main() {
+    dotenv().ok();
     let lat = std::env::var("MAP_LAT").expect("MAP_LAT env");
     let lat = lat.parse::<f64>().expect("lat to be f64");
     let lon = std::env::var("MAP_LON").expect("MAP_LON env");

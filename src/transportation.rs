@@ -1,4 +1,4 @@
-use bevy::{pbr::NotShadowCaster, prelude::*, render::mesh::*};
+use bevy::prelude::*;
 use geo_types::LineString;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::FRAC_PI_2;
@@ -13,24 +13,23 @@ pub struct Road {
 }
 #[derive(EnumIter, Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum RoadClass {
-    // highway=motorway > trunk > primary > secondary > ... > living streets > ... > footway
-    Motorway,     // - motorway
-    Primary,      // - primary
-    Secondary,    // - secondary
-    Tertiary,     // - tertiary
-    Residential,  // - residential
-    LivingStreet, // - livingStreet # similar as residential but has implied legal restriction for motor vehicles (which can vary country by country)
-    Trunk,        // - trunk
-    Unclassified, // - unclassified # known roads, paved but of low importance which does not meet definition of being motorway, trunk, primary, secondary, tertiary
-    ParkingAisle, // - parkingAisle # service road intended for parking
-    Driveway,     // - driveway # service road intended for deliveries
-    Pedestrian,   // - pedestrian
-    Footway,      // - footway
-    Steps,        // - steps
-    Track,        // - track
-    Cycleway,     // - cycleway
-    Bridleway,    // - bridleway # similar as track but has implied access only for horses
-    Unknown,      // - unknown
+    Motorway,
+    Primary,
+    Secondary,
+    Tertiary,
+    Residential,
+    LivingStreet,
+    Trunk,
+    Unclassified,
+    ParkingAisle,
+    Driveway,
+    Pedestrian,
+    Footway,
+    Steps,
+    Track,
+    Cycleway,
+    Bridleway,
+    Unknown,
 }
 impl RoadClass {
     pub fn depth_bias(&self) -> f32 {
@@ -61,17 +60,21 @@ impl RoadClass {
             "secondary" => RoadClass::Secondary,
             "tertiary" => RoadClass::Tertiary,
             "residential" => RoadClass::Residential,
-            "livingStreet" => RoadClass::LivingStreet,
+            "living_street" => RoadClass::LivingStreet,
             "trunk" => RoadClass::Trunk,
             "unclassified" => RoadClass::Unclassified,
-            "parkingAisle" => RoadClass::ParkingAisle,
+            "parking_aisle" => RoadClass::ParkingAisle,
             "driveway" => RoadClass::Driveway,
             "pedestrian" => RoadClass::Pedestrian,
             "footway" => RoadClass::Footway,
             "steps" => RoadClass::Steps,
             "track" => RoadClass::Track,
+            "path" => RoadClass::Footway, // path is similar to footway
             "cycleway" => RoadClass::Cycleway,
             "bridleway" => RoadClass::Bridleway,
+            "subway" => RoadClass::Unknown,
+            "light_rail" => RoadClass::Unknown,
+            "service" => RoadClass::Unknown,
             "unknown" => RoadClass::Unknown,
             _ => RoadClass::Unknown,
         }
@@ -99,36 +102,19 @@ pub fn line_string_road(
         .coords()
         .nth(0)
         .expect("To take exterior:0 coordinate");
-    let first_point_xz: [f64; 2] = [c1.x * k[0] - center[0], -c1.y * k[1] - center[1]]; // Yto-Z
+    let first_point_xz: [f64; 2] = [c1.x * k[0] - center[0], -c1.y * k[1] - center[1]];
 
     let line: Vec<[f64; 2]> = line_string
         .coords()
         .map(|c| {
             [
                 c.x * k[0] - center[0] - first_point_xz[0],
-                -c.y * k[1] - center[1] - first_point_xz[1], // Yto-Z
+                -c.y * k[1] - center[1] - first_point_xz[1],
             ]
         })
         .collect();
     (first_point_xz, line)
 }
-// pub fn line_string_base(line_string: &LineString) -> (f64, [f64; 2]) {
-//     let c1 = line_string
-//         .coords()
-//         .nth(0)
-//         .expect("To take line_string:0 coordinate");
-//     let p1 = geo::Point(*c1);
-//     let c2 = line_string
-//         .coords()
-//         .nth(1)
-//         .expect("To take line_string:1 coordinate");
-//     let p2 = geo::Point(*c2);
-//     let geodesic_distance = p1.geodesic_distance(&p2);
-//     let coord_distance = c1.add(c2.neg()).magnitude();
-//     let k = geodesic_distance / coord_distance;
-//     let first_point_position: [f64; 2] = [c1.x * k, c1.y * k];
-//     (k, first_point_position)
-// }
 
 pub fn transportations_start(
     mut cmd: Commands,
@@ -145,23 +131,23 @@ pub fn transportations_start(
 impl From<&RoadClass> for Color {
     fn from(value: &RoadClass) -> Self {
         match value {
-            RoadClass::Motorway => Color::DARK_GRAY,
-            RoadClass::Primary => Color::GRAY,
-            RoadClass::Secondary => Color::YELLOW,
-            RoadClass::Tertiary => Color::ANTIQUE_WHITE,
-            RoadClass::Residential => Color::BEIGE,
-            RoadClass::LivingStreet => Color::SALMON,
-            RoadClass::Trunk => Color::INDIGO,
-            RoadClass::Unclassified => Color::WHITE,
-            RoadClass::ParkingAisle => Color::AZURE,
-            RoadClass::Driveway => Color::OLIVE,
-            RoadClass::Pedestrian => Color::CRIMSON,
-            RoadClass::Footway => Color::ORANGE_RED,
-            RoadClass::Steps => Color::SILVER,
-            RoadClass::Track => Color::LIME_GREEN,
-            RoadClass::Cycleway => Color::GREEN,
-            RoadClass::Bridleway => Color::DARK_GREEN,
-            RoadClass::Unknown => Color::rgb(0.1, 0.1, 0.3),
+            RoadClass::Motorway => Color::srgb(0.2, 0.2, 0.2),
+            RoadClass::Primary => Color::srgb(0.5, 0.5, 0.5),
+            RoadClass::Secondary => Color::srgb(1.0, 1.0, 0.0),
+            RoadClass::Tertiary => Color::srgb(0.98, 0.98, 0.91),
+            RoadClass::Residential => Color::srgb(0.96, 0.87, 0.69),
+            RoadClass::LivingStreet => Color::srgb(0.98, 0.43, 0.43),
+            RoadClass::Trunk => Color::srgb(0.29, 0.0, 0.51),
+            RoadClass::Unclassified => Color::srgb(1.0, 1.0, 1.0),
+            RoadClass::ParkingAisle => Color::srgb(0.94, 1.0, 1.0),
+            RoadClass::Driveway => Color::srgb(0.5, 0.5, 0.0),
+            RoadClass::Pedestrian => Color::srgb(0.86, 0.08, 0.24),
+            RoadClass::Footway => Color::srgb(1.0, 0.27, 0.0),
+            RoadClass::Steps => Color::srgb(0.75, 0.75, 0.75),
+            RoadClass::Track => Color::srgb(0.2, 0.8, 0.2),
+            RoadClass::Cycleway => Color::srgb(0.0, 0.5, 0.0),
+            RoadClass::Bridleway => Color::srgb(0.0, 0.39, 0.0),
+            RoadClass::Unknown => Color::srgb(0.1, 0.1, 0.3),
         }
     }
 }
@@ -200,20 +186,14 @@ pub fn spawn_transportation(
 ) {
     let width = RoadWidth::from(&transportation.road_class);
     let segment = RoadSegment::new(&transportation.line, width);
-    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        VertexAttributeValues::from(segment.vertices),
+    let mut mesh = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
     );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_NORMAL,
-        VertexAttributeValues::from(segment.normals),
-    );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        VertexAttributeValues::from(segment.uvs),
-    );
-    mesh.set_indices(Some(Indices::U32(segment.indices)));
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, segment.vertices.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, segment.normals.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, segment.uvs.clone());
+    mesh.insert_indices(bevy_mesh::Indices::U32(segment.indices));
 
     let translate: Vec3 = Vec3::new(
         transportation.translate[0] as f32,
@@ -222,17 +202,15 @@ pub fn spawn_transportation(
     );
     let transform = Transform::from_translation(translate);
     cmd.spawn((
-        PbrBundle {
-            mesh: meshes.add(mesh),
-            material: map_materials
+        Mesh3d(meshes.add(mesh)),
+        MeshMaterial3d(
+            map_materials
                 .road
                 .get(&transportation.road_class)
                 .unwrap()
                 .clone(),
-            transform,
-            ..Default::default()
-        },
-        NotShadowCaster,
+        ),
+        transform,
     ));
 }
 

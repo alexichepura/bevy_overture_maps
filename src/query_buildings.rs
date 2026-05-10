@@ -3,13 +3,12 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::building::{polygon_building, Building};
 use crate::BuildingClass;
 use crate::KxyGeodesic;
+use crate::building::{Building, polygon_building};
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
-// https://github.com/shi-works/Overture-Maps-Data-for-GIS // japan
 
 pub struct BuildingsQueryParams {
     pub from_string: String,
@@ -25,21 +24,21 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
     conn.execute_batch("INSTALL spatial; LOAD spatial;")
         .unwrap();
     let from = params.from_string;
-    let limit: String = match params.limit {
+    let limit_clause = match params.limit {
         Some(l) => format!("LIMIT {}", l),
         None => String::from(""),
     };
-    let mut stmt = conn
-        .prepare(&format!(
-            "SELECT id,
-                height,
-                JSON(names) as names,
-                geometry,
-                numFloors,
-                class,
-            FROM {from} {limit}"
-        ))
-        .unwrap();
+    let query = if limit_clause.is_empty() {
+        format!(
+            "SELECT id, height, JSON(names) as names, ST_AsWKB(geometry) as geometry, num_floors, class FROM {from}"
+        )
+    } else {
+        format!(
+            "SELECT id, height, JSON(names) as names, ST_AsWKB(geometry) as geometry, num_floors, class FROM {from} {}",
+            limit_clause
+        )
+    };
+    let mut stmt = conn.prepare(&query).unwrap();
     #[derive(Debug)]
     struct DbBuilding {
         id: String,
@@ -50,19 +49,23 @@ pub fn query_buildings(params: BuildingsQueryParams) -> Vec<Building> {
         num_floors: Option<i32>,
         class: Option<String>,
     }
-    let query_iter = stmt
-        .query_map([], |row| {
-            Ok(DbBuilding {
-                id: row.get(0)?,
-                height: row.get(1)?,
-                // names: row.get(2)?,
-                // bbox: row.get(3)?,
-                geom: row.get(3)?,
-                num_floors: row.get(4)?,
-                class: row.get(5)?,
-            })
+    let query_iter = match stmt.query_map([], |row| {
+        Ok(DbBuilding {
+            id: row.get(0)?,
+            height: row.get(1)?,
+            // names: row.get(2)?,
+            // bbox: row.get(3)?,
+            geom: row.get(3)?,
+            num_floors: row.get(4)?,
+            class: row.get(5)?,
         })
-        .unwrap();
+    }) {
+        Ok(iter) => iter,
+        Err(e) => {
+            eprintln!("Failed to create query map: {:?}", e);
+            return Vec::new();
+        }
+    };
 
     let mut buildings: Vec<Building> = vec![];
     for query_item in query_iter {

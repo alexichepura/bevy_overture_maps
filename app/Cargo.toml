@@ -8,6 +8,7 @@ default = ["fps"]
 fps = []
 
 [dependencies]
+dotenvy = { version = "0.15.7"}
 arrow = { workspace = true }
 bevy = { workspace = true }
 duckdb = { workspace = true }

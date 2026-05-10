@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::mesh::*};
+use bevy::prelude::*;
 use geo::algorithm::TriangulateEarcut;
 use geo_types::Polygon;
 use serde::{Deserialize, Serialize};
@@ -6,8 +6,8 @@ use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 use strum_macros::EnumIter;
 
-use crate::material::MapMaterialHandle;
 use crate::KxyGeodesic;
+use crate::material::MapMaterialHandle;
 
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]
@@ -71,7 +71,7 @@ pub struct Building {
     pub num_floors: Option<i32>,
     pub line: Vec<[f64; 2]>,
     pub k: KxyGeodesic,
-    pub vertices: Vec<[f64; 3]>,
+    pub vertices: Vec<[f32; 3]>,
     pub triangle_indices: Vec<u32>,
 }
 
@@ -96,7 +96,7 @@ pub struct BuildingGeometryProps {
     pub num_floors: Option<i32>,
     pub line: Vec<[f64; 2]>,
     pub k: KxyGeodesic,
-    pub vertices: Vec<[f64; 3]>,
+    pub vertices: Vec<[f32; 3]>,
     pub triangle_indices: Vec<u32>,
 }
 
@@ -175,12 +175,12 @@ pub fn polygon_building(
         k,
         vertices: triangles
             .vertices
-            .chunks(2)
+            .iter()
             .map(|i| {
                 [
-                    i[0] * k[0] - center[0] - translate[0],
+                    (i[0] * k[0] - center[0] - translate[0]) as f32,
                     0.,
-                    -i[1] * k[1] - center[1] - translate[1], // Yto-Z
+                    (-i[1] * k[1] - center[1] - translate[1]) as f32,
                 ]
             })
             .collect(),
@@ -207,19 +207,19 @@ pub fn buildings_start(
 impl From<&BuildingClass> for Color {
     fn from(building_class: &BuildingClass) -> Self {
         match building_class {
-            BuildingClass::Residential => Color::rgb(0.5, 0.45, 0.4),
-            BuildingClass::Outbuilding => Color::DARK_GRAY,
-            BuildingClass::Agricultural => Color::GREEN,
-            BuildingClass::Commercial => Color::rgb(0.3, 0.3, 0.4),
-            BuildingClass::Industrial => Color::SILVER,
-            BuildingClass::Education => Color::ANTIQUE_WHITE,
-            BuildingClass::Service => Color::BISQUE,
-            BuildingClass::Religious => Color::AQUAMARINE,
-            BuildingClass::Civic => Color::rgb(0.6, 0.6, 0.8),
-            BuildingClass::Transportation => Color::PURPLE,
-            BuildingClass::Medical => Color::ORANGE_RED,
-            BuildingClass::Entertainment => Color::AZURE,
-            BuildingClass::Military => Color::NAVY,
+            BuildingClass::Residential => Color::srgb(0.5, 0.45, 0.4),
+            BuildingClass::Outbuilding => Color::srgb(0.25, 0.25, 0.25),
+            BuildingClass::Agricultural => Color::srgb(0.0, 0.5, 0.0),
+            BuildingClass::Commercial => Color::srgb(0.3, 0.3, 0.4),
+            BuildingClass::Industrial => Color::srgb(0.75, 0.75, 0.75),
+            BuildingClass::Education => Color::srgb(0.98, 0.98, 0.91),
+            BuildingClass::Service => Color::srgb(1.0, 0.73, 0.47),
+            BuildingClass::Religious => Color::srgb(0.5, 0.93, 0.73),
+            BuildingClass::Civic => Color::srgb(0.6, 0.6, 0.8),
+            BuildingClass::Transportation => Color::srgb(0.8, 0.2, 0.8),
+            BuildingClass::Medical => Color::srgb(1.0, 0.27, 0.0),
+            BuildingClass::Entertainment => Color::srgb(0.94, 1.0, 1.0),
+            BuildingClass::Military => Color::srgb(0.0, 0.0, 0.5),
         }
     }
 }
@@ -237,7 +237,7 @@ pub fn _buildings_update(buildings_res: Res<Buildings>, mut gizmos: Gizmos) {
             let n = Vec3::new(n[0], n[1], n[2]);
             let v = wall.vertices[i];
             let v = Vec3::new(v[0], v[1] + 0.01, v[2]);
-            gizmos.line(tr + v, tr + v + n, Color::rgb(0.5, 0.3, 0.3));
+            gizmos.line(tr + v, tr + v + n, Color::srgb(0.5, 0.3, 0.3));
         }
     }
 }
@@ -258,17 +258,14 @@ pub fn spawn_building(
     };
 
     let wall = Wall::new(&building.line, height);
-    let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        VertexAttributeValues::from(wall.vertices),
+    let mut mesh = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
     );
-    mesh.insert_attribute(
-        Mesh::ATTRIBUTE_NORMAL,
-        VertexAttributeValues::from(wall.normals),
-    );
-    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, VertexAttributeValues::from(wall.uvs));
-    mesh.set_indices(Some(Indices::U32(wall.indices)));
+    mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, wall.vertices.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, wall.normals.clone());
+    mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, wall.uvs.clone());
+    mesh.insert_indices(bevy_mesh::Indices::U32(wall.indices));
 
     let translate: Vec3 = Vec3::new(
         building.translate[0] as f32,
@@ -280,38 +277,35 @@ pub fn spawn_building(
         Some(c) => map_materials.walls.get(c).unwrap().clone(),
         None => map_materials.unknown_building.clone(),
     };
-    cmd.spawn((PbrBundle {
-        mesh: meshes.add(mesh),
-        material: handle.clone(),
+    cmd.spawn((
+        Mesh3d(meshes.add(mesh)),
+        MeshMaterial3d(handle.clone()),
         transform,
-        ..Default::default()
-    },));
+    ));
 
     // ROOF
-    let mut roof = Mesh::new(PrimitiveTopology::TriangleList);
+    let mut roof = Mesh::new(
+        bevy_mesh::PrimitiveTopology::TriangleList,
+        bevy_asset::RenderAssetUsages::RENDER_WORLD,
+    );
     let vertices: Vec<[f32; 3]> = building
         .vertices
         .iter()
         .map(|v| v.map(|p| p as f32))
         .collect();
-    roof.insert_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        VertexAttributeValues::from(vertices.clone()),
-    );
+    roof.insert_attribute(Mesh::ATTRIBUTE_POSITION, vertices.clone());
     roof.insert_attribute(
         Mesh::ATTRIBUTE_NORMAL,
-        VertexAttributeValues::from(
-            building
-                .vertices
-                .iter()
-                .map(|_| [0., 1., 0.] as [f32; 3])
-                .collect::<Vec<[f32; 3]>>(),
-        ),
+        building
+            .vertices
+            .iter()
+            .map(|_| [0., 1., 0.] as [f32; 3])
+            .collect::<Vec<[f32; 3]>>(),
     );
-    let uvs: Vec<[f32; 2]> = vertices.clone().iter().map(|p| [p[0], p[2]]).collect();
-    roof.insert_attribute(Mesh::ATTRIBUTE_UV_0, VertexAttributeValues::from(uvs));
+    let uvs: Vec<[f32; 2]> = vertices.iter().map(|p| [p[0], p[2]]).collect();
+    roof.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
     let bs = building.triangle_indices.clone();
-    roof.set_indices(Some(Indices::U32(bs)));
+    roof.insert_indices(bevy_mesh::Indices::U32(bs));
 
     let translation = transform.translation + Vec3::new(0., height, 0.);
     let transform: Transform = Transform::from_translation(translation);
@@ -320,12 +314,7 @@ pub fn spawn_building(
         Some(c) => map_materials.roofs.get(c).unwrap().clone(),
         None => map_materials.unknown_building_roof.clone(),
     };
-    cmd.spawn((PbrBundle {
-        mesh: meshes.add(roof),
-        material: handle,
-        transform,
-        ..Default::default()
-    },));
+    cmd.spawn((Mesh3d(meshes.add(roof)), MeshMaterial3d(handle), transform));
 }
 
 #[derive(Component, Debug)]

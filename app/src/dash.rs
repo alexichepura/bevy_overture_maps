@@ -21,9 +21,9 @@ pub fn dash_fps_system(
     mut query: Query<&mut Text, With<FpsText>>,
 ) {
     for mut text in query.iter_mut() {
-        if let Some(fps) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+        if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
             if let Some(average) = fps.average() {
-                text.sections[0].value = format!("{:.0}fps", average);
+                text.0 = format!("{:.0}fps", average);
             }
         }
     }
@@ -31,57 +31,50 @@ pub fn dash_fps_system(
 
 pub fn dash_start_system(mut cmd: Commands, asset_server: Res<AssetServer>) {
     let medium: Handle<Font> = asset_server.load("fonts/FiraMono-Medium.ttf");
-    let height = Val::Px(32.);
-    let width = Val::Px(80.);
-    cmd.spawn(NodeBundle {
-        style: Style {
-            width: Val::Percent(120.),
-            height: height.clone(),
+
+    cmd.spawn((
+        Node {
+            width: percent(100.),
+            height: px(32.),
             justify_content: JustifyContent::End,
             align_items: AlignItems::Center,
             ..default()
         },
-        ..default()
-    })
+        BackgroundColor(Color::srgba(0.15, 0.15, 0.15, 0.5)),
+    ))
     .with_children(|parent| {
-        let background_color: BackgroundColor = Color::rgba(0.15, 0.15, 0.15, 0.5).into();
         parent
-            .spawn(NodeBundle {
-                background_color,
-                style: Style {
-                    width,
-                    height: height.clone(),
+            .spawn((
+                Node {
+                    width: percent(100.),
+                    height: px(32.),
                     padding: UiRect::all(Val::Px(4.0)),
                     justify_content: JustifyContent::End,
                     align_items: AlignItems::End,
                     flex_direction: FlexDirection::Column,
                     ..default()
                 },
-                ..default()
-            })
+                BackgroundColor(Color::srgba(0.15, 0.15, 0.15, 0.5)),
+            ))
             .with_children(|parent| {
-                parent
-                    .spawn(TextBundle {
-                        style: Style {
-                            position_type: PositionType::Absolute,
-                            bottom: Val::Px(4.),
-                            right: Val::Px(4.),
-                            ..default()
-                        },
-                        text: Text {
-                            sections: vec![TextSection {
-                                value: "".to_string(),
-                                style: TextStyle {
-                                    font: medium.clone(),
-                                    font_size: 24.0,
-                                    color: Color::YELLOW_GREEN,
-                                },
-                            }],
-                            ..default()
-                        },
+                parent.spawn((
+                    Text::new(""),
+                    TextFont {
+                        font: medium.clone(),
+                        font_size: 24.0,
                         ..default()
-                    })
-                    .insert(FpsText);
+                    },
+                    TextColor(Color::srgb(0.8, 1.0, 0.0)),
+                    FpsText,
+                ));
             });
     });
+}
+
+fn percent(value: f32) -> Val {
+    Val::Percent(value)
+}
+
+fn px(value: f32) -> Val {
+    Val::Px(value)
 }
