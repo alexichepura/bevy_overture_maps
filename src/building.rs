@@ -6,8 +6,8 @@ use std::f32::consts::FRAC_PI_2;
 use std::ops::Sub;
 use strum_macros::EnumIter;
 
-use crate::material::MapMaterialHandle;
 use crate::KxyGeodesic;
+use crate::material::MapMaterialHandle;
 
 // https://docs.overturemaps.org/reference/buildings/building
 // ["residential","outbuilding","agricultural","commercial","industrial","education","service","religious","civic","transportation","medical","entertainment","military"]

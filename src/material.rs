@@ -1,4 +1,4 @@
-use bevy::prelude::{default, Assets, Color, FromWorld, Handle, Resource, StandardMaterial, World};
+use bevy::prelude::{Assets, Color, FromWorld, Handle, Resource, StandardMaterial, World, default};
 use std::collections::HashMap;
 use strum::IntoEnumIterator;
 

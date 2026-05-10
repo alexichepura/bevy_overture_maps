@@ -3,8 +3,8 @@ use bevy_overture_maps::{
     geodesic_to_coord, query_buildings, query_transportation, BuildingsQueryParams,
     TransportationQueryParams,
 };
-use geo_types::Coord;
 use dotenvy::dotenv;
+use geo_types::Coord;
 
 mod bevy;
 mod camera;

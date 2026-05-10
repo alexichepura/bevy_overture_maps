@@ -1,7 +1,7 @@
 [package]
 name = "bevy_overture_maps"
-version = "0.3.2"
-edition = "2021"
+version = "0.4.0"
+edition = "2024"
 
 [profile.release]
 codegen-units = 1
@@ -12,14 +12,16 @@ members = ["app", "cli"]
 
 [workspace.dependencies]
 arrow = { version = "58.1.0", features = [
-"ipc",
-"test_utils",
-"prettyprint",
-"json",
+    "ipc",
+    "test_utils",
+    "prettyprint",
+    "json",
 ] }
-bevy = { version = "0.18", features = ["jpeg"] }
-bevy_asset = "0.18"
-bevy_mesh = "0.18"
+bevy = { version = "0.18.1", features = ["jpeg",     "bevy_camera_controller",
+"free_camera",
+"bevy_core_pipeline"] }
+bevy_asset = "0.18.1"
+bevy_mesh = "0.18.1"
 duckdb = { version = "1.10502.0", features = ["bundled"] }
 geo = { version = "0.33.1", features = [] }
 geozero = { version = "0.15.1", features = ["with-wkb"] }

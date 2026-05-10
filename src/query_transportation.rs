@@ -3,10 +3,10 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
+use crate::KxyGeodesic;
 use crate::transportation::RoadClass;
 use crate::transportation::Segment;
-use crate::transportation::{line_string_road, Road};
-use crate::KxyGeodesic;
+use crate::transportation::{Road, line_string_road};
 
 pub struct TransportationQueryParams {
     pub from_string: String,

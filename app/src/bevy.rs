@@ -1,14 +1,15 @@
-use bevy::{prelude::*, window::WindowResolution};
-use bevy_overture_maps::{
-    buildings_start, transportations_start, Building, Buildings, MapMaterialHandle, Segment,
-    SegmentsRes,
-};
-
 use crate::{
-    camera::PlayerCameraPlugin,
+    camera::CameraPlugin,
     config::SceneConfig,
     ground::plane_start,
     light::{animate_light_direction, light_start_system},
+};
+use bevy::{
+    camera_controller::free_camera::FreeCameraPlugin, prelude::*, window::WindowResolution,
+};
+use bevy_overture_maps::{
+    buildings_start, transportations_start, Building, Buildings, MapMaterialHandle, Segment,
+    SegmentsRes,
 };
 
 pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
@@ -29,7 +30,8 @@ pub fn init_bevy(buildings: Vec<Building>, segments: Vec<Segment>) {
             }),
             ..default()
         }),
-        PlayerCameraPlugin,
+        FreeCameraPlugin,
+        CameraPlugin,
         #[cfg(feature = "fps")]
         crate::dash::DashPlugin,
     ))

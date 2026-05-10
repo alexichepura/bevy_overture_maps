@@ -3,9 +3,9 @@ use geo_types::Geometry;
 use geozero::wkb::FromWkb;
 use geozero::wkb::WkbDialect;
 
-use crate::building::{polygon_building, Building};
 use crate::BuildingClass;
 use crate::KxyGeodesic;
+use crate::building::{Building, polygon_building};
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
