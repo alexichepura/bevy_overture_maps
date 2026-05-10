@@ -69,7 +69,7 @@ impl RoadClass {
             "footway" => RoadClass::Footway,
             "steps" => RoadClass::Steps,
             "track" => RoadClass::Track,
-            "path" => RoadClass::Footway,     // path is similar to footway
+            "path" => RoadClass::Footway, // path is similar to footway
             "cycleway" => RoadClass::Cycleway,
             "bridleway" => RoadClass::Bridleway,
             "subway" => RoadClass::Unknown,

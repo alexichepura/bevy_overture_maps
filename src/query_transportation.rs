@@ -32,7 +32,10 @@ pub fn query_transportation(params: TransportationQueryParams) -> Vec<Segment> {
     let query = if limit_clause.is_empty() {
         format!("SELECT id, ST_AsWKB(geometry) as geometry, class FROM {from}")
     } else {
-        format!("SELECT id, ST_AsWKB(geometry) as geometry, class FROM {from} {}", limit_clause)
+        format!(
+            "SELECT id, ST_AsWKB(geometry) as geometry, class FROM {from} {}",
+            limit_clause
+        )
     };
     let mut stmt = conn.prepare(&query).unwrap();
     #[derive(Debug)]

@@ -9,7 +9,6 @@ use crate::building::{Building, polygon_building};
 
 // https://github.com/OvertureMaps/data/issues/8 duckdb issue
 // https://bertt.wordpress.com/2023/07/31/overture-maps/
-// https://github.com/shi-works/Overture-Maps-Data-for-GIS // japan
 
 pub struct BuildingsQueryParams {
     pub from_string: String,

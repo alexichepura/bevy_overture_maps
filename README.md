@@ -6,12 +6,21 @@ Bevy overture is an example of integration between <https://overturemaps.org> an
 
 ## Howto
 
+### Using `overturemaps download` (Recommended)
 ```sh
 uvx overturemaps download --bbox=-71.068,42.353,-71.058,42.363 \
     -f geoparquet --type=building -o parquet/-71.068_42.353_boston_building.parquet
 uvx overturemaps download --bbox=-71.068,42.353,-71.058,42.363 \
     -f geoparquet --type=segment -o parquet/-71.068_42.353_boston_transportation.parquet
 ```
+Relevant .env
+```sh
+MAP_NAME="boston"
+MAP_LON="-71.068"
+MAP_LAT="42.353"
+```
+
+### Using all data and then extracting it locally
 
 To generate location - download overture maps data. Full size ~200G.\
 <https://github.com/OvertureMaps/data>\
